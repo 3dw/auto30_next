@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "701444204172",
+    "project_id": "auto30next-56a1a",
+    "storage_bucket": "auto30next-56a1a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:701444204172:android:ceda2be54cb91a0513bda9",
+        "android_client_info": {
+          "package_name": "com.auto30.auto30_next"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEv1jZ4HnfrghavBe_jWdN5Udn-gFs9zY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
