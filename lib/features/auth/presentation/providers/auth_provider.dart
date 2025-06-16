@@ -88,4 +88,32 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> registerWithEmailAndPassword(String email, String password) async {
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+      await _auth.createUserWithEmailAndPassword(email: email, password: password);
+    } on FirebaseAuthException catch (e) {
+      _error = e.message;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> signInAnonymously() async {
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+      await _auth.signInAnonymously();
+    } on FirebaseAuthException catch (e) {
+      _error = e.message;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 } 

@@ -1,33 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:auto30_next/features/auth/presentation/providers/auth_provider.dart';
-import 'package:auto30_next/core/config/app_config.dart';
-import 'package:auto30_next/features/auth/presentation/screens/register_screen.dart';
-import 'package:auto30_next/features/auth/presentation/screens/forgot_password_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  void _handleLogin() {
+  void _handleRegister() {
     if (_formKey.currentState?.validate() ?? false) {
-      context.read<AuthProvider>().signInWithEmailAndPassword(
+      context.read<AuthProvider>().registerWithEmailAndPassword(
         _emailController.text,
         _passwordController.text,
       );
@@ -37,8 +36,8 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
-
     return Scaffold(
+      appBar: AppBar(title: const Text('Sign Up')),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -46,15 +45,8 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Form(
               key: _formKey,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    AppConfig.appName,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 48),
                   TextFormField(
                     controller: _emailController,
                     decoration: const InputDecoration(
@@ -79,11 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       labelText: 'Password',
                       prefixIcon: const Icon(Icons.lock),
                       suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                        ),
+                        icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
                         onPressed: () {
                           setState(() {
                             _obscurePassword = !_obscurePassword;
@@ -102,65 +90,40 @@ class _LoginScreenState extends State<LoginScreen> {
                       return null;
                     },
                   ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _confirmPasswordController,
+                    decoration: const InputDecoration(
+                      labelText: 'Confirm Password',
+                      prefixIcon: Icon(Icons.lock_outline),
+                    ),
+                    obscureText: _obscurePassword,
+                    validator: (value) {
+                      if (value != _passwordController.text) {
+                        return 'Passwords do not match';
+                      }
+                      return null;
+                    },
+                  ),
                   const SizedBox(height: 24),
                   if (authProvider.error != null)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16),
                       child: Text(
                         authProvider.error!,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                        ),
+                        style: TextStyle(color: Theme.of(context).colorScheme.error),
                         textAlign: TextAlign.center,
                       ),
                     ),
                   ElevatedButton(
-                    onPressed: authProvider.isLoading ? null : _handleLogin,
+                    onPressed: authProvider.isLoading ? null : _handleRegister,
                     child: authProvider.isLoading
                         ? const CircularProgressIndicator()
-                        : const Text('Sign In'),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'OR',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.grey,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  OutlinedButton.icon(
-                    onPressed: authProvider.isLoading
-                        ? null
-                        : () => authProvider.signInWithGoogle(),
-                    icon: Image.network(
-                      'https://www.google.com/favicon.ico',
-                      height: 24,
-                    ),
-                    label: const Text('Sign in with Google'),
-                  ),
-                  const SizedBox(height: 24),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                      );
-                    },
-                    child: const Text('Don\'t have an account? Sign up'),
+                        : const Text('Sign Up'),
                   ),
                   TextButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
-                      );
-                    },
-                    child: const Text('Forgot Password?'),
-                  ),
-                  OutlinedButton(
-                    onPressed: authProvider.isLoading
-                        ? null
-                        : () => authProvider.signInAnonymously(),
-                    child: const Text('Continue as Guest'),
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Back to Login'),
                   ),
                 ],
               ),
