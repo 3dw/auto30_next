@@ -4,6 +4,7 @@ import 'package:auto30_next/features/auth/presentation/providers/auth_provider.d
 import 'package:auto30_next/features/learning_center/presentation/screens/learning_center_screen.dart';
 import 'package:auto30_next/features/quick_practice/presentation/screens/quick_practice_screen.dart';
 import 'package:auto30_next/features/qr/presentation/screens/my_qr_screen.dart';
+import 'package:auto30_next/features/social/presentation/screens/social_main_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -371,7 +372,11 @@ class _SocialFAB extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FloatingActionButton.extended(
-      onPressed: () {},
+      onPressed: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const SocialMainScreen()),
+        );
+      },
       backgroundColor: Theme.of(context).colorScheme.primary,
       icon: const Icon(Icons.groups),
       label: const Text('完整社交功能'),
