@@ -11,6 +11,7 @@ class GoogleSignInButton extends StatefulWidget {
   final void Function(User?) onSignIn;
   final String viewType;
   final String label;
+  final String gsiButtonText;
 
   const GoogleSignInButton({
     super.key,
@@ -18,6 +19,7 @@ class GoogleSignInButton extends StatefulWidget {
     required this.onSignIn,
     this.viewType = 'gsi_button_html',
     this.label = 'Google 登入',
+    this.gsiButtonText = 'signin_with',
   });
 
   @override
@@ -47,7 +49,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
             });
             window.google.accounts.id.renderButton(
               document.getElementById('${widget.viewType}'),
-              { theme: 'outline', size: 'large', width: 240 }
+              { theme: 'outline', size: 'large', width: 240, text: '${widget.gsiButtonText}' }
             );
           }
         """]);

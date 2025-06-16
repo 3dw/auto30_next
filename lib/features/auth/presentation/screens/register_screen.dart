@@ -131,6 +131,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     webClientId: '701444204172-go0c55sc57ph6ltt4kacip6ofn7fb1ud.apps.googleusercontent.com',
                     viewType: 'gsi_button_html_register',
                     label: 'Google 註冊',
+                    gsiButtonText: 'signup_with',
                     onSignIn: (user) async {
                       if (user != null) {
                         if (mounted) {
