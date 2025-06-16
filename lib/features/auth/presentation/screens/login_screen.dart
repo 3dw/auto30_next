@@ -25,12 +25,16 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _handleLogin() {
+  void _handleLogin() async {
     if (_formKey.currentState?.validate() ?? false) {
-      context.read<AuthProvider>().signInWithEmailAndPassword(
+      await context.read<AuthProvider>().signInWithEmailAndPassword(
         _emailController.text,
         _passwordController.text,
       );
+      final authProvider = context.read<AuthProvider>();
+      if (authProvider.isAuthenticated) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
     }
   }
 
@@ -132,7 +136,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   OutlinedButton.icon(
                     onPressed: authProvider.isLoading
                         ? null
-                        : () => authProvider.signInWithGoogle(),
+                        : () async {
+                            await authProvider.signInWithGoogle();
+                            if (authProvider.isAuthenticated) {
+                              Navigator.of(context).popUntil((route) => route.isFirst);
+                            }
+                          },
                     icon: Image.network(
                       'https://www.google.com/favicon.ico',
                       height: 24,

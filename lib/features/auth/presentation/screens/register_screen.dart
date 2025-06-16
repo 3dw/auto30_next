@@ -24,12 +24,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  void _handleRegister() {
+  void _handleRegister() async {
     if (_formKey.currentState?.validate() ?? false) {
-      context.read<AuthProvider>().registerWithEmailAndPassword(
+      await context.read<AuthProvider>().registerWithEmailAndPassword(
         _emailController.text,
         _passwordController.text,
       );
+      final authProvider = context.read<AuthProvider>();
+      if (authProvider.isAuthenticated) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
     }
   }
 
@@ -125,7 +129,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   OutlinedButton.icon(
                     onPressed: authProvider.isLoading
                         ? null
-                        : () => authProvider.signInWithGoogle(),
+                        : () async {
+                            await authProvider.signInWithGoogle();
+                            if (authProvider.isAuthenticated) {
+                              Navigator.of(context).popUntil((route) => route.isFirst);
+                            }
+                          },
                     icon: Image.network(
                       'https://www.google.com/favicon.ico',
                       height: 24,
