@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static const Color primaryColor = Color(0xFF2196F3);
-  static const Color secondaryColor = Color(0xFF03A9F4);
-  static const Color accentColor = Color(0xFF00BCD4);
+  static const Color primaryColor = Color(0xFFFF9800);
+  static const Color secondaryColor = Color(0xFFF57C00);
+  static const Color accentColor = Color(0xFFFFE0B2);
   
   static const Color errorColor = Color(0xFFD32F2F);
   static const Color successColor = Color(0xFF388E3C);
@@ -39,7 +39,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
         ),
         filled: true,
-        fillColor: Colors.grey[100],
+        fillColor: accentColor,
       ),
       cardTheme: CardTheme(
         elevation: 2,
@@ -61,7 +61,7 @@ class AppTheme {
         error: errorColor,
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.black,
+        backgroundColor: secondaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
