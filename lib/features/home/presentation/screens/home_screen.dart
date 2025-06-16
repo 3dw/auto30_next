@@ -33,10 +33,7 @@ class _HomeAppBar extends StatelessWidget {
           icon: const Icon(Icons.grid_view_rounded),
           onPressed: () {},
         ),
-        IconButton(
-          icon: const Icon(Icons.account_circle_rounded),
-          onPressed: () {},
-        ),
+        _UserMenuButton(),
       ],
       elevation: 0,
     );
@@ -360,6 +357,26 @@ class _SocialFAB extends StatelessWidget {
       icon: const Icon(Icons.groups),
       label: const Text('完整社交功能'),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+    );
+  }
+}
+
+class _UserMenuButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.account_circle_rounded),
+      onSelected: (value) async {
+        if (value == 'logout') {
+          await context.read<AuthProvider>().signOut();
+        }
+      },
+      itemBuilder: (context) => [
+        const PopupMenuItem<String>(
+          value: 'logout',
+          child: Text('登出'),
+        ),
+      ],
     );
   }
 } 
