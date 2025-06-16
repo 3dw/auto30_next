@@ -58,16 +58,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextFormField(
                     controller: _emailController,
                     decoration: const InputDecoration(
-                      labelText: 'Email',
+                      labelText: '電子郵件',
                       prefixIcon: Icon(Icons.email),
                     ),
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your email';
+                        return '請輸入電子郵件';
                       }
                       if (!value.contains('@')) {
-                        return 'Please enter a valid email';
+                        return '請輸入有效的電子郵件';
                       }
                       return null;
                     },
@@ -76,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextFormField(
                     controller: _passwordController,
                     decoration: InputDecoration(
-                      labelText: 'Password',
+                      labelText: '密碼',
                       prefixIcon: const Icon(Icons.lock),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -94,10 +94,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     obscureText: _obscurePassword,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your password';
+                        return '請輸入密碼';
                       }
                       if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
+                        return '密碼至少需 6 個字元';
                       }
                       return null;
                     },
@@ -118,11 +118,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: authProvider.isLoading ? null : _handleLogin,
                     child: authProvider.isLoading
                         ? const CircularProgressIndicator()
-                        : const Text('Sign In'),
+                        : const Text('登入'),
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    'OR',
+                    '或',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.grey,
@@ -137,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       'https://www.google.com/favicon.ico',
                       height: 24,
                     ),
-                    label: const Text('Sign in with Google'),
+                    label: const Text('使用 Google 帳號登入'),
                   ),
                   const SizedBox(height: 24),
                   TextButton(
@@ -146,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         MaterialPageRoute(builder: (_) => const RegisterScreen()),
                       );
                     },
-                    child: const Text('Don\'t have an account? Sign up'),
+                    child: const Text('沒有帳號？註冊'),
                   ),
                   TextButton(
                     onPressed: () {
@@ -154,13 +154,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
                       );
                     },
-                    child: const Text('Forgot Password?'),
+                    child: const Text('忘記密碼？'),
                   ),
                   OutlinedButton(
                     onPressed: authProvider.isLoading
                         ? null
                         : () => authProvider.signInAnonymously(),
-                    child: const Text('Continue as Guest'),
+                    child: const Text('訪客登入'),
                   ),
                 ],
               ),

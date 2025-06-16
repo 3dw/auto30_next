@@ -32,7 +32,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Forgot Password')),
+      appBar: AppBar(title: const Text('忘記密碼')),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -45,16 +45,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   TextFormField(
                     controller: _emailController,
                     decoration: const InputDecoration(
-                      labelText: 'Email',
+                      labelText: '電子郵件',
                       prefixIcon: Icon(Icons.email),
                     ),
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your email';
+                        return '請輸入電子郵件';
                       }
                       if (!value.contains('@')) {
-                        return 'Please enter a valid email';
+                        return '請輸入有效的電子郵件';
                       }
                       return null;
                     },
@@ -73,11 +73,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     onPressed: authProvider.isLoading ? null : _handleReset,
                     child: authProvider.isLoading
                         ? const CircularProgressIndicator()
-                        : const Text('Send Reset Email'),
+                        : const Text('發送重設密碼信'),
                   ),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Back to Login'),
+                    child: const Text('返回登入'),
                   ),
                 ],
               ),

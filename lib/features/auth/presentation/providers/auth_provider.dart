@@ -46,18 +46,24 @@ class AuthProvider with ChangeNotifier {
       _error = null;
       notifyListeners();
 
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return;
-
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        _error = 'Google 登入已取消';
+        _isLoading = false;
+        notifyListeners();
+        return;
+      }
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-
       await _auth.signInWithCredential(credential);
     } on FirebaseAuthException catch (e) {
       _error = e.message;
+    } catch (e) {
+      _error = e.toString();
     } finally {
       _isLoading = false;
       notifyListeners();

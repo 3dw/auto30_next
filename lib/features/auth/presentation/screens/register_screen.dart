@@ -37,7 +37,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Sign Up')),
+      appBar: AppBar(title: const Text('註冊新帳號')),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -50,16 +50,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextFormField(
                     controller: _emailController,
                     decoration: const InputDecoration(
-                      labelText: 'Email',
+                      labelText: '電子郵件',
                       prefixIcon: Icon(Icons.email),
                     ),
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your email';
+                        return '請輸入電子郵件';
                       }
                       if (!value.contains('@')) {
-                        return 'Please enter a valid email';
+                        return '請輸入有效的電子郵件';
                       }
                       return null;
                     },
@@ -68,7 +68,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextFormField(
                     controller: _passwordController,
                     decoration: InputDecoration(
-                      labelText: 'Password',
+                      labelText: '密碼',
                       prefixIcon: const Icon(Icons.lock),
                       suffixIcon: IconButton(
                         icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
@@ -82,10 +82,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     obscureText: _obscurePassword,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your password';
+                        return '請輸入密碼';
                       }
                       if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
+                        return '密碼至少需 6 個字元';
                       }
                       return null;
                     },
@@ -94,13 +94,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextFormField(
                     controller: _confirmPasswordController,
                     decoration: const InputDecoration(
-                      labelText: 'Confirm Password',
+                      labelText: '確認密碼',
                       prefixIcon: Icon(Icons.lock_outline),
                     ),
                     obscureText: _obscurePassword,
                     validator: (value) {
                       if (value != _passwordController.text) {
-                        return 'Passwords do not match';
+                        return '兩次輸入的密碼不一致';
                       }
                       return null;
                     },
@@ -119,11 +119,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     onPressed: authProvider.isLoading ? null : _handleRegister,
                     child: authProvider.isLoading
                         ? const CircularProgressIndicator()
-                        : const Text('Sign Up'),
+                        : const Text('註冊'),
                   ),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Back to Login'),
+                    child: const Text('返回登入'),
                   ),
                 ],
               ),
