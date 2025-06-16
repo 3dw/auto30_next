@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:auto30_next/features/auth/presentation/providers/auth_provider.dart';
+import 'package:auto30_next/features/learning_center/presentation/screens/learning_center_screen.dart';
+import 'package:auto30_next/features/quick_practice/presentation/screens/quick_practice_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -313,7 +315,11 @@ class _BottomActionSection extends StatelessWidget {
             children: [
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const LearningCenterScreen()),
+                    );
+                  },
                   icon: const Icon(Icons.school),
                   label: const Text('學習中心'),
                   style: ElevatedButton.styleFrom(
@@ -327,7 +333,11 @@ class _BottomActionSection extends StatelessWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const QuickPracticeScreen()),
+                    );
+                  },
                   icon: const Icon(Icons.code),
                   label: const Text('快速練習'),
                   style: ElevatedButton.styleFrom(
