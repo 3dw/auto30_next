@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:auto30_next/features/auth/presentation/providers/auth_provider.dart';
+import 'package:auto30_next/features/auth/presentation/widgets/google_sign_in_button.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -126,20 +127,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         : const Text('註冊'),
                   ),
                   const SizedBox(height: 16),
-                  OutlinedButton.icon(
-                    onPressed: authProvider.isLoading
-                        ? null
-                        : () async {
-                            await authProvider.signInWithGoogle();
-                            if (authProvider.isAuthenticated) {
-                              Navigator.of(context).popUntil((route) => route.isFirst);
-                            }
-                          },
-                    icon: Image.network(
-                      'https://www.google.com/favicon.ico',
-                      height: 24,
-                    ),
-                    label: const Text('使用 Google 帳號註冊'),
+                  GoogleSignInButton(
+                    webClientId: '701444204172-go0c55sc57ph6ltt4kacip6ofn7fb1ud.apps.googleusercontent.com',
+                    viewType: 'gsi_button_html_register',
+                    onSignIn: (user) async {
+                      if (user != null) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('歡迎回來，${user.displayName ?? '用戶'}！'),
+                              backgroundColor: Colors.green,
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                          Navigator.of(context).popUntil((route) => route.isFirst);
+                        }
+                      } else {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Google 註冊失敗'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
+                    },
                   ),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
