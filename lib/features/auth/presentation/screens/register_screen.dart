@@ -121,6 +121,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ? const CircularProgressIndicator()
                         : const Text('註冊'),
                   ),
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    onPressed: authProvider.isLoading
+                        ? null
+                        : () => authProvider.signInWithGoogle(),
+                    icon: Image.network(
+                      'https://www.google.com/favicon.ico',
+                      height: 24,
+                    ),
+                    label: const Text('使用 Google 帳號註冊'),
+                  ),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
                     child: const Text('返回登入'),
