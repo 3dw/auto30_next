@@ -10,12 +10,14 @@ class GoogleSignInButton extends StatefulWidget {
   final String webClientId;
   final void Function(User?) onSignIn;
   final String viewType;
+  final String label;
 
   const GoogleSignInButton({
     super.key,
     required this.webClientId,
     required this.onSignIn,
     this.viewType = 'gsi_button_html',
+    this.label = 'Google 登入',
   });
 
   @override
@@ -80,7 +82,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
       // 手機/桌面用原生按鈕
       return ElevatedButton.icon(
         icon: const Icon(Icons.login),
-        label: const Text('Google 登入'),
+        label: Text(widget.label),
         onPressed: () async {
           final googleSignIn = GoogleSignIn();
           final account = await googleSignIn.signIn();
