@@ -5,6 +5,7 @@ import 'dart:html' as html;
 import 'dart:js' as js;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class GoogleSignInButton extends StatefulWidget {
   final String webClientId;

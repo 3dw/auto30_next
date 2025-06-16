@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:auto30_next/features/auth/presentation/providers/auth_provider.dart';
 import 'package:auto30_next/features/learning_center/presentation/screens/learning_center_screen.dart';
 import 'package:auto30_next/features/quick_practice/presentation/screens/quick_practice_screen.dart';
+import 'package:auto30_next/features/qr/presentation/screens/my_qr_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -34,6 +35,14 @@ class _HomeAppBar extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.grid_view_rounded),
           onPressed: () {},
+        ),
+        IconButton(
+          icon: const Icon(Icons.qr_code),
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const MyQrScreen()),
+            );
+          },
         ),
         _UserMenuButton(),
       ],
