@@ -61,13 +61,13 @@ class AppTheme {
         filled: true,
         fillColor: accentColor,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
+        clipBehavior: Clip.antiAlias,
         elevation: 2,
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        color: accentColor,
-        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
       ),
     );
   }
@@ -124,13 +124,13 @@ class AppTheme {
         filled: true,
         fillColor: Colors.grey[900],
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
+        clipBehavior: Clip.antiAlias,
         elevation: 2,
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        color: Colors.grey[900],
-        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
       ),
     );
   }
