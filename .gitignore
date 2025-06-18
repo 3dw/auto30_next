@@ -41,3 +41,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# 忽略 Firebase 設定檔
+lib/core/config/firebase_options.dart
