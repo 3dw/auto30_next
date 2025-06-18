@@ -14,14 +14,25 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-  runApp(const MyApp());
-  } catch (e) {
+    runApp(const MyApp());
+  } catch (e, stackTrace) {
     print('Error initializing Firebase: $e');
-    // Show error UI
+    print('StackTrace: $stackTrace');
+    // Show error UI with more details
     runApp(MaterialApp(
       home: Scaffold(
         body: Center(
-          child: Text('Error initializing app: $e'),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('Error initializing app:'),
+                Text(e.toString(), style: const TextStyle(color: Colors.red)),
+                const SizedBox(height: 16),
+                Text(stackTrace.toString(), style: const TextStyle(fontSize: 10)),
+              ],
+            ),
+          ),
         ),
       ),
     ));
