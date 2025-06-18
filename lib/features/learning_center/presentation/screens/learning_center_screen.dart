@@ -10,7 +10,9 @@ class LearningCenterScreen extends StatelessWidget {
       {'title': 'Widget 基礎', 'desc': '掌握常用 Widget', 'progress': 0.5},
       {'title': '狀態管理', 'desc': 'Provider、Bloc、Riverpod', 'progress': 0.2},
     ];
-    final totalProgress = chapters.map((c) => c['progress'] as double).reduce((a, b) => a + b) / chapters.length;
+    final totalProgress =
+        chapters.map((c) => c['progress'] as double).reduce((a, b) => a + b) /
+            chapters.length;
 
     return Scaffold(
       appBar: AppBar(title: const Text('學習中心')),
@@ -31,12 +33,14 @@ class LearningCenterScreen extends StatelessWidget {
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 8),
                     child: ListTile(
-                      title: Text(c['title'] as String, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      title: Text(c['title'] as String,
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: Text(c['desc'] as String),
                       trailing: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('進度 ${((c['progress'] as double) * 100).toStringAsFixed(0)}%'),
+                          Text(
+                              '進度 ${((c['progress'] as double) * 100).toStringAsFixed(0)}%'),
                           Icon(Icons.arrow_forward_ios, size: 16),
                         ],
                       ),
@@ -53,4 +57,4 @@ class LearningCenterScreen extends StatelessWidget {
       ),
     );
   }
-} 
+}

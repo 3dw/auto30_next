@@ -29,9 +29,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void _handleRegister() async {
     if (_formKey.currentState?.validate() ?? false) {
       await context.read<AuthProvider>().registerWithEmailAndPassword(
-        _emailController.text,
-        _passwordController.text,
-      );
+            _emailController.text,
+            _passwordController.text,
+          );
       final authProvider = context.read<AuthProvider>();
       if (authProvider.isAuthenticated) {
         Navigator.of(context).popUntil((route) => route.isFirst);
@@ -77,7 +77,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       labelText: '密碼',
                       prefixIcon: const Icon(Icons.lock),
                       suffixIcon: IconButton(
-                        icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                        icon: Icon(_obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility),
                         onPressed: () {
                           setState(() {
                             _obscurePassword = !_obscurePassword;
@@ -117,7 +119,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       padding: const EdgeInsets.only(bottom: 16),
                       child: Text(
                         authProvider.error!,
-                        style: TextStyle(color: Theme.of(context).colorScheme.error),
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.error),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -138,12 +141,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('歡迎回來，${user.displayName ?? '用戶'}！'),
+                              content:
+                                  Text('歡迎回來，${user.displayName ?? '用戶'}！'),
                               backgroundColor: Colors.green,
                               duration: const Duration(seconds: 2),
                             ),
                           );
-                          Navigator.of(context).popUntil((route) => route.isFirst);
+                          Navigator.of(context)
+                              .popUntil((route) => route.isFirst);
                         }
                       } else {
                         if (mounted) {
@@ -169,4 +174,4 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
     );
   }
-} 
+}

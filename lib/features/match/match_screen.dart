@@ -52,7 +52,9 @@ class _MatchScreenState extends State<MatchScreen> {
                   children: const [
                     Icon(Icons.people, color: Colors.orange),
                     SizedBox(width: 8),
-                    Text('智能配對系統', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    Text('智能配對系統',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18)),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -63,10 +65,15 @@ class _MatchScreenState extends State<MatchScreen> {
                       padding: const EdgeInsets.only(right: 8),
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
-                          backgroundColor: selected ? Colors.orange : Colors.white,
-                          foregroundColor: selected ? Colors.white : Colors.orange,
-                          side: BorderSide(color: Colors.orange.withOpacity(selected ? 0 : 1)),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                          backgroundColor:
+                              selected ? Colors.orange : Colors.white,
+                          foregroundColor:
+                              selected ? Colors.white : Colors.orange,
+                          side: BorderSide(
+                              color:
+                                  Colors.orange.withOpacity(selected ? 0 : 1)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24)),
                         ),
                         onPressed: () => setState(() => filterIndex = i),
                         child: Text(filters[i]),
@@ -87,7 +94,10 @@ class _MatchScreenState extends State<MatchScreen> {
                   color: Colors.orange[50],
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
-                    BoxShadow(color: Colors.orange.withOpacity(0.08), blurRadius: 12, offset: const Offset(0, 4)),
+                    BoxShadow(
+                        color: Colors.orange.withOpacity(0.08),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4)),
                   ],
                 ),
                 child: Column(
@@ -100,26 +110,41 @@ class _MatchScreenState extends State<MatchScreen> {
                         CircleAvatar(
                           radius: 32,
                           backgroundColor: Colors.orange[200],
-                          child: Text(user['name'][0], style: const TextStyle(fontSize: 32, color: Colors.orange, fontWeight: FontWeight.bold)),
+                          child: Text(user['name'][0],
+                              style: const TextStyle(
+                                  fontSize: 32,
+                                  color: Colors.orange,
+                                  fontWeight: FontWeight.bold)),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(user['name'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
-                              Text('${user['age']} 歲', style: const TextStyle(fontSize: 16, color: Colors.black54)),
-                              Text('距離 ${user['distance']}', style: const TextStyle(fontSize: 14, color: Colors.black38)),
+                              Text(user['name'],
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 22)),
+                              Text('${user['age']} 歲',
+                                  style: const TextStyle(
+                                      fontSize: 16, color: Colors.black54)),
+                              Text('距離 ${user['distance']}',
+                                  style: const TextStyle(
+                                      fontSize: 14, color: Colors.black38)),
                             ],
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
                             color: Colors.orange,
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          child: Text('${(user['match'] * 100).toInt()}%', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          child: Text('${(user['match'] * 100).toInt()}%',
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold)),
                         ),
                       ],
                     ),
@@ -134,7 +159,8 @@ class _MatchScreenState extends State<MatchScreen> {
                         children: const [
                           Icon(Icons.info, color: Colors.orange),
                           SizedBox(width: 8),
-                          Text('個人介紹', style: TextStyle(fontWeight: FontWeight.bold)),
+                          Text('個人介紹',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
@@ -146,14 +172,16 @@ class _MatchScreenState extends State<MatchScreen> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Text(user['intro'], style: const TextStyle(fontSize: 15)),
+                      child: Text(user['intro'],
+                          style: const TextStyle(fontSize: 15)),
                     ),
                     const SizedBox(height: 8),
                     Row(
                       children: const [
                         Icon(Icons.interests, color: Colors.orange),
                         SizedBox(width: 8),
-                        Text('興趣愛好', style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text('興趣愛好',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
                       ],
                     ),
                     Wrap(
@@ -162,7 +190,9 @@ class _MatchScreenState extends State<MatchScreen> {
                           .map<Widget>((t) => Chip(
                                 label: Text(t),
                                 backgroundColor: Colors.orange[100],
-                                labelStyle: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+                                labelStyle: const TextStyle(
+                                    color: Colors.orange,
+                                    fontWeight: FontWeight.bold),
                               ))
                           .toList(),
                     ),
@@ -171,7 +201,8 @@ class _MatchScreenState extends State<MatchScreen> {
                       children: const [
                         Icon(Icons.star, color: Colors.red),
                         SizedBox(width: 8),
-                        Text('專長技能', style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text('專長技能',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
                       ],
                     ),
                     Wrap(
@@ -180,7 +211,9 @@ class _MatchScreenState extends State<MatchScreen> {
                           .map<Widget>((t) => Chip(
                                 label: Text(t),
                                 backgroundColor: Colors.red[50],
-                                labelStyle: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                                labelStyle: const TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold),
                               ))
                           .toList(),
                     ),
@@ -220,4 +253,4 @@ class _MatchScreenState extends State<MatchScreen> {
       ),
     );
   }
-} 
+}

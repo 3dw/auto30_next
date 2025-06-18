@@ -4,11 +4,11 @@ class AppTheme {
   static const Color primaryColor = Color(0xFFFF9800);
   static const Color secondaryColor = Color(0xFFF57C00);
   static const Color accentColor = Color(0xFFFFE0B2);
-  
+
   static const Color errorColor = Color(0xFFD32F2F);
   static const Color successColor = Color(0xFF388E3C);
   static const Color warningColor = Color(0xFFF57C00);
-  
+
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
@@ -134,4 +134,4 @@ class AppTheme {
       ),
     );
   }
-} 
+}

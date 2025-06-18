@@ -57,15 +57,20 @@ class _QuickPracticeScreenState extends State<QuickPracticeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(q['question'] as String, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    Text(q['question'] as String,
+                        style: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 16),
                     ...List.generate((q['options'] as List).length, (idx) {
                       return ListTile(
                         title: Text((q['options'] as List)[idx]),
                         leading: Radio<int>(
                           value: idx,
-                          groupValue: isCorrect == null ? null : q['answer'] as int?,
-                          onChanged: isCorrect == null ? (v) => checkAnswer(idx) : null,
+                          groupValue:
+                              isCorrect == null ? null : q['answer'] as int?,
+                          onChanged: isCorrect == null
+                              ? (v) => checkAnswer(idx)
+                              : null,
                         ),
                       );
                     }),
@@ -95,4 +100,4 @@ class _QuickPracticeScreenState extends State<QuickPracticeScreen> {
       ),
     );
   }
-} 
+}

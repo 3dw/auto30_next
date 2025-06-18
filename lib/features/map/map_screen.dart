@@ -13,11 +13,46 @@ class _MapScreenState extends State<MapScreen> {
 
   // 假資料
   final List<Map<String, dynamic>> users = [
-    {'name': '小雅', 'age': 24, 'distance': '0.9km', 'tag': '物理', 'type': '導師', 'color': Colors.orange},
-    {'name': '小強', 'age': 23, 'distance': '1.2km', 'tag': '數學', 'type': '同興趣', 'color': Colors.deepOrange},
-    {'name': '小美', 'age': 22, 'distance': '1.5km', 'tag': '英文', 'type': '學習夥伴', 'color': Colors.orange},
-    {'name': '小安', 'age': 21, 'distance': '2.0km', 'tag': '化學', 'type': '同興趣', 'color': Colors.deepOrange},
-    {'name': '小華', 'age': 20, 'distance': '2.5km', 'tag': '生物', 'type': '導師', 'color': Colors.orange},
+    {
+      'name': '小雅',
+      'age': 24,
+      'distance': '0.9km',
+      'tag': '物理',
+      'type': '導師',
+      'color': Colors.orange
+    },
+    {
+      'name': '小強',
+      'age': 23,
+      'distance': '1.2km',
+      'tag': '數學',
+      'type': '同興趣',
+      'color': Colors.deepOrange
+    },
+    {
+      'name': '小美',
+      'age': 22,
+      'distance': '1.5km',
+      'tag': '英文',
+      'type': '學習夥伴',
+      'color': Colors.orange
+    },
+    {
+      'name': '小安',
+      'age': 21,
+      'distance': '2.0km',
+      'tag': '化學',
+      'type': '同興趣',
+      'color': Colors.deepOrange
+    },
+    {
+      'name': '小華',
+      'age': 20,
+      'distance': '2.5km',
+      'tag': '生物',
+      'type': '導師',
+      'color': Colors.orange
+    },
   ];
 
   @override
@@ -50,7 +85,9 @@ class _MapScreenState extends State<MapScreen> {
                   children: const [
                     Icon(Icons.location_on, color: Colors.orange),
                     SizedBox(width: 8),
-                    Text('附近的學習夥伴', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    Text('附近的學習夥伴',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18)),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -61,10 +98,15 @@ class _MapScreenState extends State<MapScreen> {
                       padding: const EdgeInsets.only(right: 8),
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
-                          backgroundColor: selected ? Colors.orange : Colors.white,
-                          foregroundColor: selected ? Colors.white : Colors.orange,
-                          side: BorderSide(color: Colors.orange.withOpacity(selected ? 0 : 1)),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                          backgroundColor:
+                              selected ? Colors.orange : Colors.white,
+                          foregroundColor:
+                              selected ? Colors.white : Colors.orange,
+                          side: BorderSide(
+                              color:
+                                  Colors.orange.withOpacity(selected ? 0 : 1)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24)),
                         ),
                         onPressed: () => setState(() => filterIndex = i),
                         child: Text(filters[i]),
@@ -87,7 +129,10 @@ class _MapScreenState extends State<MapScreen> {
                     color: Colors.orange[100],
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Center(child: Text('（地圖區，僅示意）', style: TextStyle(color: Colors.orange, fontSize: 16))),
+                  child: const Center(
+                      child: Text('（地圖區，僅示意）',
+                          style:
+                              TextStyle(color: Colors.orange, fontSize: 16))),
                 ),
                 // 假標記
                 ...List.generate(users.length, (i) {
@@ -103,13 +148,17 @@ class _MapScreenState extends State<MapScreen> {
                         ),
                         Container(
                           margin: const EdgeInsets.only(top: 2),
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(8),
-                            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 2)],
+                            boxShadow: [
+                              BoxShadow(color: Colors.black12, blurRadius: 2)
+                            ],
                           ),
-                          child: Text(user['name'], style: const TextStyle(fontSize: 12)),
+                          child: Text(user['name'],
+                              style: const TextStyle(fontSize: 12)),
                         ),
                       ],
                     ),
@@ -126,7 +175,9 @@ class _MapScreenState extends State<MapScreen> {
                         child: Icon(Icons.my_location, color: Colors.white),
                       ),
                       SizedBox(height: 2),
-                      Text('我的位置', style: TextStyle(fontSize: 12, color: Colors.deepOrange)),
+                      Text('我的位置',
+                          style: TextStyle(
+                              fontSize: 12, color: Colors.deepOrange)),
                     ],
                   ),
                 ),
@@ -164,8 +215,13 @@ class _MapScreenState extends State<MapScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Text('附近用戶 (${users.length})', style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 16)),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Text('附近用戶 (${users.length})',
+                        style: const TextStyle(
+                            color: Colors.orange,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16)),
                   ),
                   Expanded(
                     child: ListView.separated(
@@ -174,16 +230,25 @@ class _MapScreenState extends State<MapScreen> {
                       itemBuilder: (context, i) {
                         final user = users[i];
                         return ListTile(
-                          leading: CircleAvatar(backgroundColor: user['color'], child: const Icon(Icons.person, color: Colors.white)),
-                          title: Text('${user['name']} (${user['age']}歲)', style: const TextStyle(fontWeight: FontWeight.bold)),
+                          leading: CircleAvatar(
+                              backgroundColor: user['color'],
+                              child: const Icon(Icons.person,
+                                  color: Colors.white)),
+                          title: Text('${user['name']} (${user['age']}歲)',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold)),
                           subtitle: Text('${user['distance']}・${user['tag']}'),
                           trailing: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
                               color: user['color'].withOpacity(0.15),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Text(user['type'], style: TextStyle(color: user['color'], fontWeight: FontWeight.bold)),
+                            child: Text(user['type'],
+                                style: TextStyle(
+                                    color: user['color'],
+                                    fontWeight: FontWeight.bold)),
                           ),
                         );
                       },
@@ -197,4 +262,4 @@ class _MapScreenState extends State<MapScreen> {
       ),
     );
   }
-} 
+}

@@ -8,7 +8,8 @@ class MyQrScreen extends StatefulWidget {
   State<MyQrScreen> createState() => _MyQrScreenState();
 }
 
-class _MyQrScreenState extends State<MyQrScreen> with SingleTickerProviderStateMixin {
+class _MyQrScreenState extends State<MyQrScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool qrEnabled = true;
   bool showContact = false;
@@ -55,7 +56,8 @@ class _MyQrScreenState extends State<MyQrScreen> with SingleTickerProviderStateM
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                Text('${user['age']} 歲・${user['desc']}', style: const TextStyle(fontSize: 16)),
+                Text('${user['age']} 歲・${user['desc']}',
+                    style: const TextStyle(fontSize: 16)),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -71,7 +73,8 @@ class _MyQrScreenState extends State<MyQrScreen> with SingleTickerProviderStateM
                     height: 180,
                     color: Colors.grey[300],
                     alignment: Alignment.center,
-                    child: const Text('QR 產生器暫停', style: TextStyle(color: Colors.black54)),
+                    child: const Text('QR 產生器暫停',
+                        style: TextStyle(color: Colors.black54)),
                   ),
                 const SizedBox(height: 16),
                 Row(
@@ -81,7 +84,8 @@ class _MyQrScreenState extends State<MyQrScreen> with SingleTickerProviderStateM
                         onPressed: () {/* 儲存到相簿 */},
                         icon: const Icon(Icons.save),
                         label: const Text('保存到相簿'),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -90,7 +94,8 @@ class _MyQrScreenState extends State<MyQrScreen> with SingleTickerProviderStateM
                         onPressed: () {/* 分享 QR 碼 */},
                         icon: const Icon(Icons.share),
                         label: const Text('分享 QR 碼'),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.deepOrange),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepOrange),
                       ),
                     ),
                   ],
@@ -105,9 +110,11 @@ class _MyQrScreenState extends State<MyQrScreen> with SingleTickerProviderStateM
                       children: const [
                         ListTile(
                           leading: Icon(Icons.info, color: Colors.orange),
-                          title: Text('使用說明', style: TextStyle(fontWeight: FontWeight.bold)),
+                          title: Text('使用說明',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
                         ),
-                        Text('• 保存 QR 碼圖片到手機相簿\n• 分享給想認識的朋友\n• 朋友掃描後可查看你的互助旗\n• 可隨時更新或停用 QR 碼'),
+                        Text(
+                            '• 保存 QR 碼圖片到手機相簿\n• 分享給想認識的朋友\n• 朋友掃描後可查看你的互助旗\n• 可隨時更新或停用 QR 碼'),
                       ],
                     ),
                   ),
@@ -121,7 +128,8 @@ class _MyQrScreenState extends State<MyQrScreen> with SingleTickerProviderStateM
                       children: [
                         const ListTile(
                           leading: Icon(Icons.shield, color: Colors.orange),
-                          title: Text('隱私設定', style: TextStyle(fontWeight: FontWeight.bold)),
+                          title: Text('隱私設定',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
                         ),
                         SwitchListTile(
                           title: const Text('啟用 QR 碼'),
@@ -139,7 +147,8 @@ class _MyQrScreenState extends State<MyQrScreen> with SingleTickerProviderStateM
                         Center(
                           child: TextButton(
                             onPressed: () {/* 重新生成 QR 碼 */},
-                            child: const Text('重新生成 QR 碼', style: TextStyle(color: Colors.orange)),
+                            child: const Text('重新生成 QR 碼',
+                                style: TextStyle(color: Colors.orange)),
                           ),
                         ),
                       ],
@@ -155,4 +164,4 @@ class _MyQrScreenState extends State<MyQrScreen> with SingleTickerProviderStateM
       ),
     );
   }
-} 
+}

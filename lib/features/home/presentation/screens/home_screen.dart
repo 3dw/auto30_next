@@ -83,9 +83,14 @@ class _WelcomeSection extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: Column(
         children: [
-          Icon(Icons.chat_bubble_outline, size: 64, color: Theme.of(context).colorScheme.primary),
+          Icon(Icons.chat_bubble_outline,
+              size: 64, color: Theme.of(context).colorScheme.primary),
           const SizedBox(height: 12),
-          Text('歡迎使用 Auto30', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Theme.of(context).colorScheme.primary)),
+          Text('歡迎使用 Auto30',
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.copyWith(color: Theme.of(context).colorScheme.primary)),
           const SizedBox(height: 8),
           const Text('一個促進自主學習交流的平台', style: TextStyle(fontSize: 16)),
         ],
@@ -104,7 +109,10 @@ class _AnnouncementSection extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
-          colors: [Theme.of(context).colorScheme.primary.withOpacity(0.9), Theme.of(context).colorScheme.secondary.withOpacity(0.7)],
+          colors: [
+            Theme.of(context).colorScheme.primary.withOpacity(0.9),
+            Theme.of(context).colorScheme.secondary.withOpacity(0.7)
+          ],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
@@ -112,9 +120,14 @@ class _AnnouncementSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: const [
-          Text('歡迎來到自學3.0', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+          Text('歡迎來到自學3.0',
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white)),
           SizedBox(height: 4),
-          Text('透過地理位置、興趣與專長，找到志同道合的朋友', style: TextStyle(fontSize: 15, color: Colors.white)),
+          Text('透過地理位置、興趣與專長，找到志同道合的朋友',
+              style: TextStyle(fontSize: 15, color: Colors.white)),
         ],
       ),
     );
@@ -129,7 +142,11 @@ class _QuickFeatureSection extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Text('快速功能', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.primary)),
+          child: Text('快速功能',
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: Theme.of(context).colorScheme.primary)),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -141,10 +158,14 @@ class _QuickFeatureSection extends StatelessWidget {
             crossAxisSpacing: 12,
             childAspectRatio: 2.2,
             children: const [
-              _QuickFeatureCard(icon: Icons.location_on, title: '附近的人', subtitle: '查看地圖'),
-              _QuickFeatureCard(icon: Icons.shuffle, title: '隨機配對', subtitle: '找新朋友'),
-              _QuickFeatureCard(icon: Icons.flag, title: '我的互助旗', subtitle: '編輯資料'),
-              _QuickFeatureCard(icon: Icons.qr_code, title: '我的QR碼', subtitle: '分享資料'),
+              _QuickFeatureCard(
+                  icon: Icons.location_on, title: '附近的人', subtitle: '查看地圖'),
+              _QuickFeatureCard(
+                  icon: Icons.shuffle, title: '隨機配對', subtitle: '找新朋友'),
+              _QuickFeatureCard(
+                  icon: Icons.flag, title: '我的互助旗', subtitle: '編輯資料'),
+              _QuickFeatureCard(
+                  icon: Icons.qr_code, title: '我的QR碼', subtitle: '分享資料'),
             ],
           ),
         ),
@@ -157,7 +178,8 @@ class _QuickFeatureCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
-  const _QuickFeatureCard({required this.icon, required this.title, required this.subtitle});
+  const _QuickFeatureCard(
+      {required this.icon, required this.title, required this.subtitle});
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -175,8 +197,12 @@ class _QuickFeatureCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  Text(subtitle, style: const TextStyle(fontSize: 13, color: Colors.black54)),
+                  Text(title,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text(subtitle,
+                      style:
+                          const TextStyle(fontSize: 13, color: Colors.black54)),
                 ],
               ),
             ),
@@ -196,9 +222,14 @@ class _RecentActivitySection extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Text('最近活動', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.primary)),
+          child: Text('最近活動',
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: Theme.of(context).colorScheme.primary)),
         ),
-        ..._recentActivities.map((activity) => _ActivityCard(activity: activity)),
+        ..._recentActivities
+            .map((activity) => _ActivityCard(activity: activity)),
       ],
     );
   }
@@ -214,10 +245,13 @@ class _ActivityCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: ListTile(
-        leading: Icon(activity['icon'] as IconData, color: Theme.of(context).colorScheme.primary, size: 28),
-        title: Text(activity['title'] as String, style: const TextStyle(fontWeight: FontWeight.bold)),
+        leading: Icon(activity['icon'] as IconData,
+            color: Theme.of(context).colorScheme.primary, size: 28),
+        title: Text(activity['title'] as String,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(activity['subtitle'] as String),
-        trailing: Text(activity['time'] as String, style: const TextStyle(fontSize: 13, color: Colors.black54)),
+        trailing: Text(activity['time'] as String,
+            style: const TextStyle(fontSize: 13, color: Colors.black54)),
       ),
     );
   }
@@ -253,7 +287,11 @@ class _PlatformFeatureSection extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Text('平台特色', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.primary)),
+          child: Text('平台特色',
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: Theme.of(context).colorScheme.primary)),
         ),
         ..._platformFeatures.map((feature) => _FeatureCard(feature: feature)),
       ],
@@ -271,8 +309,10 @@ class _FeatureCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: ListTile(
-        leading: Icon(feature['icon'] as IconData, color: Theme.of(context).colorScheme.primary, size: 28),
-        title: Text(feature['title'] as String, style: const TextStyle(fontWeight: FontWeight.bold)),
+        leading: Icon(feature['icon'] as IconData,
+            color: Theme.of(context).colorScheme.primary, size: 28),
+        title: Text(feature['title'] as String,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(feature['subtitle'] as String),
       ),
     );
@@ -312,14 +352,21 @@ class _BottomActionSection extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
-          colors: [Theme.of(context).colorScheme.primary.withOpacity(0.1), Theme.of(context).colorScheme.primary.withOpacity(0.05)],
+          colors: [
+            Theme.of(context).colorScheme.primary.withOpacity(0.1),
+            Theme.of(context).colorScheme.primary.withOpacity(0.05)
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
       ),
       child: Column(
         children: [
-          Text('開始你的 Flutter 學習之旅', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.primary)),
+          Text('開始你的 Flutter 學習之旅',
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: Theme.of(context).colorScheme.primary)),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -327,7 +374,8 @@ class _BottomActionSection extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const LearningCenterScreen()),
+                      MaterialPageRoute(
+                          builder: (_) => const LearningCenterScreen()),
                     );
                   },
                   icon: const Icon(Icons.school),
@@ -336,7 +384,8 @@ class _BottomActionSection extends StatelessWidget {
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
                   ),
                 ),
               ),
@@ -345,7 +394,8 @@ class _BottomActionSection extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const QuickPracticeScreen()),
+                      MaterialPageRoute(
+                          builder: (_) => const QuickPracticeScreen()),
                     );
                   },
                   icon: const Icon(Icons.code),
@@ -354,14 +404,16 @@ class _BottomActionSection extends StatelessWidget {
                     backgroundColor: Theme.of(context).colorScheme.secondary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
                   ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          const Text('點擊「學習中心」開始完整的教學指南和互動練習', style: TextStyle(fontSize: 13, color: Colors.black54)),
+          const Text('點擊「學習中心」開始完整的教學指南和互動練習',
+              style: TextStyle(fontSize: 13, color: Colors.black54)),
         ],
       ),
     );
@@ -403,4 +455,4 @@ class _UserMenuButton extends StatelessWidget {
       ],
     );
   }
-} 
+}

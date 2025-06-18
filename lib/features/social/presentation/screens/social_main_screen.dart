@@ -39,4 +39,4 @@ class _SocialMainScreenState extends State<SocialMainScreen> {
       ),
     );
   }
-} 
+}

@@ -40,7 +40,8 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
 
       // 渲染 GSI 按鈕
       Future.delayed(const Duration(milliseconds: 100), () {
-        js.context.callMethod('eval', ["""
+        js.context.callMethod('eval', [
+          """
           if (window.google && window.google.accounts && window.google.accounts.id) {
             window.google.accounts.id.initialize({
               client_id: '${widget.webClientId}',
@@ -53,7 +54,8 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
               { theme: 'outline', size: 'large', width: 240, text: '${widget.gsiButtonText}' }
             );
           }
-        """]);
+        """
+        ]);
       });
 
       // 監聽 GSI callback
@@ -63,7 +65,8 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
         if (idToken != null) {
           try {
             final credential = GoogleAuthProvider.credential(idToken: idToken);
-            final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+            final userCredential =
+                await FirebaseAuth.instance.signInWithCredential(credential);
             widget.onSignIn(userCredential.user);
           } catch (e) {
             widget.onSignIn(null);
@@ -95,7 +98,8 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
               accessToken: googleAuth.accessToken,
               idToken: googleAuth.idToken,
             );
-            final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+            final userCredential =
+                await FirebaseAuth.instance.signInWithCredential(credential);
             widget.onSignIn(userCredential.user);
           } else {
             widget.onSignIn(null);
@@ -104,4 +108,4 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
       );
     }
   }
-} 
+}

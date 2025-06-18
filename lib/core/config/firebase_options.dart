@@ -47,4 +47,4 @@ class DefaultFirebaseOptions {
     iosClientId: 'YOUR-IOS-CLIENT-ID',
     iosBundleId: 'com.auto30.auto30Next',
   );
-} 
+}
