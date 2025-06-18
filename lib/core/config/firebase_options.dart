@@ -25,7 +25,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '701444204172',
     projectId: 'auto30next-56a1a',
     authDomain: 'auto30next-56a1a.firebaseapp.com',
-    storageBucket: 'auto30next-56a1a.firebasestorage.app',
+    storageBucket: 'auto30next-56a1a.appspot.com',
     measurementId: 'G-679XL5GVLT',
   );
 
@@ -35,7 +35,7 @@ class DefaultFirebaseOptions {
     appId: 'YOUR-ANDROID-APP-ID',
     messagingSenderId: 'YOUR-ANDROID-MESSAGING-SENDER-ID',
     projectId: 'auto30next-56a1a',
-    storageBucket: 'auto30next-56a1a.firebasestorage.app',
+    storageBucket: 'auto30next-56a1a.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -43,7 +43,7 @@ class DefaultFirebaseOptions {
     appId: 'YOUR-IOS-APP-ID',
     messagingSenderId: 'YOUR-IOS-MESSAGING-SENDER-ID',
     projectId: 'auto30next-56a1a',
-    storageBucket: 'auto30next-56a1a.firebasestorage.app',
+    storageBucket: 'auto30next-56a1a.appspot.com',
     iosClientId: 'YOUR-IOS-CLIENT-ID',
     iosBundleId: 'com.auto30.auto30Next',
   );
