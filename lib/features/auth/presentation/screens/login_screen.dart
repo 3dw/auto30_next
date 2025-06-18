@@ -29,9 +29,10 @@ class _LoginScreenState extends State<LoginScreen> {
   void _handleLogin() async {
     if (_formKey.currentState?.validate() ?? false) {
       await context.read<AuthProvider>().signInWithEmailAndPassword(
-            _emailController.text,
-            _passwordController.text,
-          );
+        _emailController.text,
+        _passwordController.text,
+      );
+      if (!mounted) return;
       final authProvider = context.read<AuthProvider>();
       if (authProvider.isAuthenticated) {
         Navigator.of(context).popUntil((route) => route.isFirst);
@@ -42,7 +43,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
-    final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: const Color(0xFFFDE0B2),
       body: Center(
@@ -59,22 +59,22 @@ class _LoginScreenState extends State<LoginScreen> {
                   borderRadius: BorderRadius.circular(32),
                 ),
                 child: Column(
-                  children: [
+                  children: const [
                     Icon(Icons.chat_bubble_outline,
                         size: 80, color: Colors.orange),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     Text('Auto30',
                         style: TextStyle(
                             fontSize: 36,
                             fontWeight: FontWeight.bold,
                             color: Colors.orange)),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     Text('自主學習促進會',
                         style: TextStyle(
                             fontSize: 20,
                             color: Colors.red,
                             fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     Text('開始你的自主學習互助之旅',
                         style: TextStyle(fontSize: 16, color: Colors.black38)),
                   ],
@@ -93,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text('登入帳號',
+                      const Text('登入帳號',
                           style: TextStyle(
                               fontSize: 22,
                               color: Colors.orange,

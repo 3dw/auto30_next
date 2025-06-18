@@ -5,7 +5,7 @@ import 'dart:html' as html;
 import 'dart:js' as js;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+// import 'package:qr_flutter/qr_flutter.dart';
 
 class GoogleSignInButton extends StatefulWidget {
   final String webClientId;
@@ -32,13 +32,13 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
   void initState() {
     super.initState();
     if (kIsWeb) {
-      // 註冊 view factory
+      // Register view factory
       ui.platformViewRegistry.registerViewFactory(
         widget.viewType,
         (int viewId) => html.DivElement()..id = widget.viewType,
       );
 
-      // 渲染 GSI 按鈕
+      // Render GSI button
       Future.delayed(const Duration(milliseconds: 100), () {
         js.context.callMethod('eval', [
           """
@@ -58,7 +58,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
         ]);
       });
 
-      // 監聽 GSI callback
+      // Listen for GSI callback
       html.window.addEventListener('gsi_callback', (event) async {
         final customEvent = event as html.CustomEvent;
         final idToken = customEvent.detail;
@@ -85,7 +85,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
         child: HtmlElementView(viewType: widget.viewType),
       );
     } else {
-      // 手機/桌面用原生按鈕
+      // Native button for mobile/desktop
       return ElevatedButton.icon(
         icon: const Icon(Icons.login),
         label: Text(widget.label),

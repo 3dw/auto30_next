@@ -71,7 +71,7 @@ class _MatchScreenState extends State<MatchScreen> {
                               selected ? Colors.white : Colors.orange,
                           side: BorderSide(
                               color:
-                                  Colors.orange.withOpacity(selected ? 0 : 1)),
+                                  Colors.orange.withAlpha(((selected ? 0 : 1) * 255).toInt())),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(24)),
                         ),
@@ -95,7 +95,7 @@ class _MatchScreenState extends State<MatchScreen> {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.orange.withOpacity(0.08),
+                        color: Colors.orange.withAlpha((0.08 * 255).toInt()),
                         blurRadius: 12,
                         offset: const Offset(0, 4)),
                   ],

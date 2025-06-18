@@ -57,7 +57,6 @@ class _HomeBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<AuthProvider>().user;
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -110,8 +109,8 @@ class _AnnouncementSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
           colors: [
-            Theme.of(context).colorScheme.primary.withOpacity(0.9),
-            Theme.of(context).colorScheme.secondary.withOpacity(0.7)
+            Theme.of(context).colorScheme.primary.withAlpha((0.9 * 255).toInt()),
+            Theme.of(context).colorScheme.secondary.withAlpha((0.7 * 255).toInt())
           ],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
@@ -183,7 +182,7 @@ class _QuickFeatureCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Theme.of(context).colorScheme.surface.withOpacity(0.7),
+      color: Theme.of(context).colorScheme.surface.withAlpha((0.7 * 255).toInt()),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 1,
       child: Padding(
@@ -241,7 +240,7 @@ class _ActivityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Theme.of(context).colorScheme.surface.withOpacity(0.7),
+      color: Theme.of(context).colorScheme.surface.withAlpha((0.7 * 255).toInt()),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: ListTile(
@@ -305,7 +304,7 @@ class _FeatureCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Theme.of(context).colorScheme.surface.withOpacity(0.7),
+      color: Theme.of(context).colorScheme.surface.withAlpha((0.7 * 255).toInt()),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: ListTile(
@@ -353,8 +352,8 @@ class _BottomActionSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
           colors: [
-            Theme.of(context).colorScheme.primary.withOpacity(0.1),
-            Theme.of(context).colorScheme.primary.withOpacity(0.05)
+            Theme.of(context).colorScheme.primary.withAlpha((0.1 * 255).toInt()),
+            Theme.of(context).colorScheme.primary.withAlpha((0.05 * 255).toInt())
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

@@ -16,8 +16,8 @@ void main() async {
     );
     runApp(const MyApp());
   } catch (e, stackTrace) {
-    print('Error initializing Firebase: $e');
-    print('StackTrace: $stackTrace');
+    debugPrint('Error initializing Firebase: $e');
+    debugPrint('StackTrace: $stackTrace');
     // Show error UI with more details
     runApp(MaterialApp(
       home: Scaffold(

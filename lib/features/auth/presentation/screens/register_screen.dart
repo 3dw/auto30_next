@@ -29,9 +29,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void _handleRegister() async {
     if (_formKey.currentState?.validate() ?? false) {
       await context.read<AuthProvider>().registerWithEmailAndPassword(
-            _emailController.text,
-            _passwordController.text,
-          );
+        _emailController.text,
+        _passwordController.text,
+      );
+      if (!mounted) return;
       final authProvider = context.read<AuthProvider>();
       if (authProvider.isAuthenticated) {
         Navigator.of(context).popUntil((route) => route.isFirst);
