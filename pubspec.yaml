@@ -53,14 +53,14 @@ dependencies:
   package_info_plus: ^8.3.0
   device_info_plus: ^11.3.0
   # Authentication
-  firebase_core: ^2.24.2
-  firebase_auth: ^4.15.3
+  firebase_core: ^3.14.0
+  firebase_auth: ^5.6.0
   google_sign_in: ^6.1.6
   # Analytics & Crash Reporting
-  firebase_analytics: ^10.7.4
-  firebase_crashlytics: ^3.4.8
+  firebase_analytics: ^11.5.0
+  firebase_crashlytics: ^4.3.7
   # Push Notifications
-  firebase_messaging: ^14.7.9
+  firebase_messaging: ^15.2.7
   flutter_local_notifications: ^18.0.0
   sqflite: ^2.3.0
   path: ^1.8.3
