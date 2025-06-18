@@ -1,0 +1,28 @@
+{
+  "project_info": {
+    "project_number": "YOUR-PROJECT-NUMBER",
+    "project_id": "YOUR-PROJECT-ID",
+    "storage_bucket": "YOUR-STORAGE-BUCKET"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "YOUR-MOBILESDK-APP-ID",
+        "android_client_info": {
+          "package_name": "YOUR-PACKAGE-NAME"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "YOUR-API-KEY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ]
+} 

@@ -92,6 +92,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 1. 前往 [Firebase Console](https://console.firebase.google.com/) 建立新專案或使用現有專案。
 2. 在專案設定中，選擇「新增應用」，並依照指示註冊 Web、Android 或 iOS 應用。
-3. 下載 Firebase 設定檔（例如 `google-services.json` 或 `GoogleService-Info.plist`），並放置於專案對應目錄中。
+3. 下載 Firebase 設定檔：
+   - 對於 Android，下載 `google-services.json` 並放置於 `android/app/` 目錄中。
+   - 對於 iOS，下載 `GoogleService-Info.plist` 並放置於 `ios/Runner/` 目錄中。
 4. 使用 Firebase CLI 或手動方式生成 `firebase_options.dart` 檔案，並將其放置於 `lib/core/config/` 目錄下。
-5. 請注意：`firebase_options.dart` 包含敏感資訊，已加入 .gitignore，請勿上傳至版本控制系統。可參考 `firebase_options.example.dart` 了解配置結構。
+5. 請注意：`firebase_options.dart`、`google-services.json` 和 `GoogleService-Info.plist` 包含敏感資訊，已加入 .gitignore，請勿上傳至版本控制系統。可參考 `firebase_options.example.dart`、`google-services.example.json` 和 `GoogleService-Info.example.plist` 了解配置結構。

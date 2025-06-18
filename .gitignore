@@ -44,3 +44,5 @@ app.*.map.json
 
 # 忽略 Firebase 設定檔
 lib/core/config/firebase_options.dart
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
