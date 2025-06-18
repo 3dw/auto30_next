@@ -39,11 +39,15 @@
   <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
 
-  <meta name="google-signin-client_id" content="701444204172-go0c55sc57ph6ltt4kacip6ofn7fb1ud.apps.googleusercontent.com" />
-</head>
-<body>
+  <!-- Google Sign In meta tag will be dynamically injected -->
+  <meta name="google-signin-client_id" id="google-signin-meta" />
+
   <script>
     window.addEventListener('load', function(ev) {
+      // Set Google Client ID from environment variable
+      const meta = document.getElementById('google-signin-meta');
+      meta.setAttribute('content', window.googleClientId || '');
+
       // Download main.dart.js
       _flutter.loader.loadEntrypoint({
         serviceWorker: {
@@ -57,5 +61,7 @@
       });
     });
   </script>
+</head>
+<body>
 </body>
 </html>

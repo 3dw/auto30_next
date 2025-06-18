@@ -1,4 +1,12 @@
+import 'package:flutter/foundation.dart';
+
 class AppConfig {
+  static const String googleClientId = String.fromEnvironment(
+    'GOOGLE_CLIENT_ID',
+    defaultValue: '270389952986-ieilk8oot9an611crndg2ijobv88pokt.apps.googleusercontent.com',
+  );
+
+  // 其他配置項可以加在這裡
   static const String appName = 'Auto30 Next';
   static const String appVersion = '1.0.0';
   static const String apiBaseUrl = 'https://api.auto30.com'; // Replace with your actual API URL
@@ -30,4 +38,9 @@ class AppConfig {
   static const Duration shortAnimation = Duration(milliseconds: 200);
   static const Duration mediumAnimation = Duration(milliseconds: 350);
   static const Duration longAnimation = Duration(milliseconds: 500);
+
+  // 環境相關配置
+  static bool get isDevelopment => kDebugMode;
+  static bool get isProduction => kReleaseMode;
+  static bool get isWeb => kIsWeb;
 } 

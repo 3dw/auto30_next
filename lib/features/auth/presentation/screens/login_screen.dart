@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:auto30_next/core/config/app_config.dart';
 import 'package:auto30_next/features/auth/presentation/providers/auth_provider.dart';
 import 'package:auto30_next/features/auth/presentation/screens/register_screen.dart';
 import 'package:auto30_next/features/auth/presentation/screens/forgot_password_screen.dart';
@@ -166,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 12),
                       // Google 登入按鈕
                       GoogleSignInButton(
-                        webClientId: '701444204172-go0c55sc57ph6ltt4kacip6ofn7fb1ud.apps.googleusercontent.com',
+                        webClientId: AppConfig.googleClientId,
                         onSignIn: (user) async {
                           if (user != null) {
                             if (mounted) {

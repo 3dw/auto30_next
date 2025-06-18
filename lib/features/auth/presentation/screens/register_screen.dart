@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:auto30_next/core/config/app_config.dart';
 import 'package:auto30_next/features/auth/presentation/providers/auth_provider.dart';
 import 'package:auto30_next/features/auth/presentation/widgets/google_sign_in_button.dart';
 
@@ -128,7 +129,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 16),
                   GoogleSignInButton(
-                    webClientId: '701444204172-go0c55sc57ph6ltt4kacip6ofn7fb1ud.apps.googleusercontent.com',
+                    webClientId: AppConfig.googleClientId,
                     viewType: 'gsi_button_html_register',
                     label: 'Google 註冊',
                     gsiButtonText: 'signup_with',
