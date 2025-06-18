@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="/">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="A next generation version of auto20-next with enhanced features inspired by frankly.">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="auto30_next">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>Auto30 Next</title>
+  <link rel="manifest" href="manifest.json">
+
+  <script>
+    // The value below is injected by flutter build, do not touch.
+    const serviceWorkerVersion = "2881273470";
+  </script>
+  <!-- This script adds the flutter initialization JS code -->
+  <script src="flutter.js" defer></script>
+</head>
+<body>
+  <div id="loading-indicator">
+    <style>
+      body {
+        background-color: #FDE0B2;
+        margin: 0;
+      }
+      
+      .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        -ms-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+      }
+      
+      .loading-dot {
+        width: 10px;
+        height: 10px;
+        margin: 5px;
+        background-color: #000;
+        border-radius: 50%;
+        animation: loading 0.6s ease-in-out infinite;
+      }
+      
+      .loading-dot:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      
+      .loading-dot:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+      
+      @keyframes loading {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.5); }
+        100% { transform: scale(1); }
+      }
+
+      .error-message {
+        color: red;
+        text-align: center;
+        padding: 20px;
+        font-family: sans-serif;
+      }
+    </style>
+    <div class="loading">
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+    </div>
+  </div>
+  
+  <script>
+    window.addEventListener('load', function() {
+      var loading = document.querySelector('#loading-indicator');
+      
+      _flutter.loader.loadEntrypoint({
+        serviceWorker: {
+          serviceWorkerVersion: serviceWorkerVersion,
+        },
+        onEntrypointLoaded: async function(engineInitializer) {
+          try {
+            const appRunner = await engineInitializer.initializeEngine({
+              useColorEmoji: true,
+            });
+            await appRunner.runApp();
+          } catch (error) {
+            console.error('Error running Flutter app:', error);
+            loading.innerHTML = '<div class="error-message">應用程式載入失敗，請重新整理頁面<br>Error: ' + error.message + '</div>';
+          }
+        }
+      }).catch(function(error) {
+        console.error('Error loading Flutter engine:', error);
+        loading.innerHTML = '<div class="error-message">Flutter 引擎載入失敗，請重新整理頁面<br>Error: ' + error.message + '</div>';
+      });
+    });
+  </script>
+</body>
+</html>
