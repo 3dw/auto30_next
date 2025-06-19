@@ -7,7 +7,7 @@ class MatchScreen extends StatefulWidget {
   State<MatchScreen> createState() => _MatchScreenState();
 }
 
-class _MatchScreenState extends State<MatchScreen> {
+class _MatchScreenState extends State<MatchScreen> with TickerProviderStateMixin {
   int filterIndex = 0;
   final List<String> filters = ['興趣配對', '位置配對', '技能配對', '隨機配對'];
 
@@ -16,8 +16,8 @@ class _MatchScreenState extends State<MatchScreen> {
     {
       'name': '小安',
       'age': 15,
-      'distance': '1.3 km',
-      'match': 0.95,
+      'distance': 1.3,
+      'match': 95,
       'intro': '我是一直熱愛學習的人，希望能找到一起進步的夥伴！',
       'interests': ['音樂', '藝術', '文學'],
       'skills': ['英文對話', '日文基礎'],
@@ -25,8 +25,8 @@ class _MatchScreenState extends State<MatchScreen> {
     {
       'name': '小杰',
       'age': 18,
-      'distance': '2.6 km',
-      'match': 0.85,
+      'distance': 2.6,
+      'match': 85,
       'intro': '我是一個熱愛學習的人，希望能找到一起進步的夥伴！',
       'interests': ['程式設計', '數學', '物理'],
       'skills': ['Flutter開發', 'Python程式設計'],
@@ -35,118 +35,26 @@ class _MatchScreenState extends State<MatchScreen> {
   ];
   int currentIndex = 0;
   bool matched = false;
+  bool isLoading = false;
 
-  void _showUserInfoBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        builder: (context, scrollController) => Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Stack(
-            children: [
-              SingleChildScrollView(
-                controller: scrollController,
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Center(
-                        child: CircleAvatar(
-                          radius: 40,
-                          backgroundColor: Colors.orange[200],
-                          child: Text(
-                            users[currentIndex]['name'][0],
-                            style: const TextStyle(
-                              fontSize: 36,
-                              color: Colors.orange,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Center(
-                        child: Column(
-                          children: [
-                            Text(
-                              users[currentIndex]['name'],
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              '${users[currentIndex]['age']} 歲',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.black54,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      const Text('詳細資訊', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                      const SizedBox(height: 12),
-                      Text('配對分析', style: TextStyle(color: Colors.orange[800], fontWeight: FontWeight.bold)),
-                      Text('・配對分析：${(users[currentIndex]['match'] * 100).toInt()}%'),
-                      Text('・距離：${users[currentIndex]['distance']}'),
-                      Text('・共同興趣：${(users[currentIndex]['interests'] as List).join('、')}'),
-                      const SizedBox(height: 16),
-                      Text('興趣愛好', style: TextStyle(color: Colors.orange[800], fontWeight: FontWeight.bold)),
-                      ...List.generate(users[currentIndex]['interests'].length, (i) => Text('・${users[currentIndex]['interests'][i]}')),
-                      const SizedBox(height: 16),
-                      Text('專長技能', style: TextStyle(color: Colors.red[800], fontWeight: FontWeight.bold)),
-                      ...List.generate(users[currentIndex]['skills'].length, (i) => Text('・${users[currentIndex]['skills'][i]}')),
-                      const SizedBox(height: 24),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () => Navigator.pop(context),
-                              icon: const Icon(Icons.message),
-                              label: const Text('發送訊息'),
-                              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () => Navigator.pop(context),
-                              icon: const Icon(Icons.favorite_border),
-                              label: const Text('表示興趣'),
-                              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange[100], foregroundColor: Colors.orange),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                  ),
-                ),
-              ),
-              Positioned(
-                right: 8,
-                top: 8,
-                child: IconButton(
-                  icon: const Icon(Icons.close, size: 28),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+  late AnimationController _animationController;
+  late Animation<double> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
     );
+    _slideAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+    _animationController.forward();
   }
 
   void _nextUser() {
@@ -156,6 +64,8 @@ class _MatchScreenState extends State<MatchScreen> {
         currentIndex = (currentIndex + 1) % users.length;
       }
     });
+    _animationController.reset();
+    _animationController.forward();
   }
 
   void _matchSuccess() {
@@ -174,9 +84,27 @@ class _MatchScreenState extends State<MatchScreen> {
     Future.delayed(const Duration(seconds: 1), _nextUser);
   }
 
+  void _showUserInfoBottomSheet(BuildContext context) {
+    final user = users[currentIndex];
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => _CandidateDetailSheet(user: user),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = users[currentIndex];
+    final screenSize = MediaQuery.of(context).size;
+    final isDesktop = screenSize.width > 600;
+    
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange,
@@ -195,243 +123,526 @@ class _MatchScreenState extends State<MatchScreen> {
       ),
       body: Column(
         children: [
+          // 頂部配對類型選擇
           Container(
-            color: Colors.orange[50],
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  spreadRadius: 1,
+                  blurRadius: 3,
+                ),
+              ],
+            ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: const [
+                const Row(
+                  children: [
                     Icon(Icons.people, color: Colors.orange),
                     SizedBox(width: 8),
-                    Text('智能配對系統',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 18)),
+                    Text(
+                      '智能配對系統',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
-                Row(
-                  children: List.generate(filters.length, (i) {
-                    final selected = filterIndex == i;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor:
-                              selected ? Colors.orange : Colors.white,
-                          foregroundColor:
-                              selected ? Colors.white : Colors.orange,
-                          side: BorderSide(
-                              color:
-                                  Colors.orange.withAlpha(((selected ? 0 : 1) * 255).toInt())),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24)),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: filters.asMap().entries.map((entry) {
+                      final i = entry.key;
+                      final type = entry.value;
+                      final isSelected = filterIndex == i;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: FilterChip(
+                          label: Text(type),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setState(() {
+                              filterIndex = i;
+                              // 可根據 type 重新載入資料
+                            });
+                          },
+                          selectedColor: Colors.orange.shade100,
+                          checkmarkColor: Colors.orange,
                         ),
-                        onPressed: () => setState(() => filterIndex = i),
-                        child: Text(filters[i]),
-                      ),
-                    );
-                  }),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          Card(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            elevation: 2,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          // 配對卡片區域
+          Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 32,
-                        backgroundColor: Colors.orange[200],
-                        child: Text(user['name'][0],
-                            style: const TextStyle(
-                                fontSize: 32,
-                                color: Colors.orange,
-                                fontWeight: FontWeight.bold)),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(user['name'],
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 22)),
-                            Text('${user['age']} 歲',
-                                style: const TextStyle(
-                                    fontSize: 16, color: Colors.black54)),
-                            Text('距離 ${user['distance']}',
-                                style: const TextStyle(
-                                    fontSize: 14, color: Colors.black38)),
-                          ],
+              padding: EdgeInsets.all(isDesktop ? 20 : 16),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: isDesktop ? 500 : double.infinity,
+                  maxHeight: double.infinity,
+                ),
+                child: Center(
+                  child: AnimatedBuilder(
+                    animation: _slideAnimation,
+                    builder: (context, child) {
+                      return Transform.translate(
+                        offset: Offset(
+                          (1 - _slideAnimation.value) * MediaQuery.of(context).size.width,
+                          0,
                         ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.orange,
-                          borderRadius: BorderRadius.circular(16),
+                        child: _MatchingCard(
+                          user: user,
+                          matched: matched,
                         ),
-                        child: Text('${(user['match'] * 100).toInt()}%',
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold)),
-                      ),
-                    ],
+                      );
+                    },
                   ),
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.orange[50],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.info_outline,
-                            color: Colors.orange, size: 20),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            user['intro'],
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.black87,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      const Icon(Icons.interests,
-                          color: Colors.orange, size: 20),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Wrap(
-                          spacing: 8,
-                          children: user['interests']
-                              .map<Widget>((t) => Chip(
-                                    label: Text(t),
-                                    backgroundColor: Colors.orange[100],
-                                    labelStyle: const TextStyle(
-                                        color: Colors.orange,
-                                        fontWeight: FontWeight.bold),
-                                  ))
-                              .toList(),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      const Icon(Icons.star, color: Colors.red),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Wrap(
-                          spacing: 8,
-                          children: user['skills']
-                              .map<Widget>((t) => Chip(
-                                    label: Text(t),
-                                    backgroundColor: Colors.red[50],
-                                    labelStyle: const TextStyle(
-                                        color: Colors.red,
-                                        fontWeight: FontWeight.bold),
-                                  ))
-                              .toList(),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (matched)
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 16),
-                        child: Icon(Icons.favorite, color: Colors.pink, size: 48),
-                      ),
-                    ),
-                ],
+                ),
               ),
             ),
           ),
+          // 底部操作按鈕
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                FloatingActionButton(
+                  heroTag: "reject",
+                  onPressed: _nextUser,
+                  backgroundColor: Colors.deepOrange,
+                  child: const Icon(Icons.close, color: Colors.white),
+                ),
+                FloatingActionButton(
+                  heroTag: "info",
+                  onPressed: () => _showUserInfoBottomSheet(context),
+                  backgroundColor: Colors.orange.shade600,
+                  child: const Icon(Icons.info, color: Colors.white),
+                ),
+                FloatingActionButton(
+                  heroTag: "accept",
+                  onPressed: _matchSuccess,
+                  backgroundColor: Colors.orange,
+                  child: const Icon(Icons.favorite, color: Colors.white),
+                ),
+              ],
+            ),
+          ),
         ],
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 24),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            SquareIconButton(
-              color: const Color(0xFFFF5722), // 紅色
-              icon: const Icon(Icons.close, color: Colors.white, size: 36),
-              onTap: _nextUser,
-            ),
-            SquareIconButton(
-              color: Colors.orange,
-              icon: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const Icon(Icons.info, color: Colors.orange, size: 24),
-                ],
-              ),
-              onTap: () => _showUserInfoBottomSheet(context),
-            ),
-            SquareIconButton(
-              color: Colors.orange,
-              icon: const Icon(Icons.favorite, color: Colors.white, size: 32),
-              onTap: _matchSuccess,
-            ),
-          ],
-        ),
       ),
     );
   }
 }
 
-class SquareIconButton extends StatelessWidget {
-  final Color color;
-  final Widget icon;
-  final VoidCallback onTap;
-  const SquareIconButton({super.key, required this.color, required this.icon, required this.onTap});
+class _MatchingCard extends StatelessWidget {
+  final Map<String, dynamic> user;
+  final bool matched;
+  const _MatchingCard({required this.user, required this.matched});
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: color,
-      borderRadius: BorderRadius.circular(24),
-      elevation: 6,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(24),
-        onTap: onTap,
-        child: SizedBox(
-          width: 72,
-          height: 72,
-          child: Center(child: icon),
+    final screenSize = MediaQuery.of(context).size;
+    final isDesktop = screenSize.width > 600;
+    
+    return Card(
+      elevation: 8,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            colors: [Colors.orange.shade50, Colors.orange.shade100],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(isDesktop ? 24 : 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 頭像和基本資訊
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    radius: isDesktop ? 50 : 40,
+                    backgroundColor: Colors.orange.shade100,
+                    child: Text(
+                      user['name'][0],
+                      style: TextStyle(
+                        fontSize: isDesktop ? 36 : 32,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          user['name'],
+                          style: TextStyle(
+                            fontSize: isDesktop ? 28 : 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '${user['age']} 歲',
+                          style: TextStyle(
+                            fontSize: isDesktop ? 18 : 16,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                        Text(
+                          '距離 ${user['distance'].toStringAsFixed(1)} km',
+                          style: TextStyle(
+                            fontSize: isDesktop ? 16 : 14,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // 配對分數
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isDesktop ? 16 : 12, 
+                      vertical: isDesktop ? 8 : 6
+                    ),
+                    decoration: BoxDecoration(
+                      color: _getScoreColor(user['match']),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${user['match']}%',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: isDesktop ? 16 : 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: isDesktop ? 24 : 20),
+              // 個人介紹
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(isDesktop ? 20 : 16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.person, color: Colors.orange),
+                        const SizedBox(width: 8),
+                        Text(
+                          '個人介紹',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: isDesktop ? 18 : 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      user['intro'],
+                      style: TextStyle(fontSize: isDesktop ? 16 : 14),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: isDesktop ? 20 : 16),
+              // 興趣標籤
+              if ((user['interests'] as List).isNotEmpty) ...[
+                Row(
+                  children: [
+                    const Icon(Icons.interests, color: Colors.orange),
+                    const SizedBox(width: 8),
+                    Text(
+                      '興趣愛好',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: isDesktop ? 18 : 16,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: isDesktop ? 12 : 8,
+                  runSpacing: isDesktop ? 12 : 8,
+                  children: (user['interests'] as List).map<Widget>((interest) {
+                    return Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isDesktop ? 16 : 12, 
+                        vertical: isDesktop ? 8 : 6
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade100,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.orange.shade300),
+                      ),
+                      child: Text(
+                        interest,
+                        style: TextStyle(
+                          color: Colors.orange,
+                          fontWeight: FontWeight.w500,
+                          fontSize: isDesktop ? 15 : 14,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                SizedBox(height: isDesktop ? 20 : 16),
+              ],
+              // 技能標籤
+              if ((user['skills'] as List).isNotEmpty) ...[
+                Row(
+                  children: [
+                    const Icon(Icons.star, color: Colors.deepOrange),
+                    const SizedBox(width: 8),
+                    Text(
+                      '專長技能',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: isDesktop ? 18 : 16,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: isDesktop ? 12 : 8,
+                  runSpacing: isDesktop ? 12 : 8,
+                  children: (user['skills'] as List).map<Widget>((skill) {
+                    return Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isDesktop ? 16 : 12, 
+                        vertical: isDesktop ? 8 : 6
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.deepOrange.shade100,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.deepOrange.shade300),
+                      ),
+                      child: Text(
+                        skill,
+                        style: TextStyle(
+                          color: Colors.deepOrange,
+                          fontWeight: FontWeight.w500,
+                          fontSize: isDesktop ? 15 : 14,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+              if (matched) ...[
+                SizedBox(height: isDesktop ? 20 : 16),
+                Center(
+                  child: Icon(
+                    Icons.favorite, 
+                    color: Colors.pink, 
+                    size: isDesktop ? 56 : 48
+                  ),
+                ),
+              ],
+              // 底部間距確保內容不會被遮擋
+              SizedBox(height: isDesktop ? 20 : 16),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Color _getScoreColor(int score) {
+    if (score >= 80) return Colors.orange;
+    if (score >= 60) return Colors.orange.shade600;
+    return Colors.deepOrange;
+  }
+}
+
+class _CandidateDetailSheet extends StatelessWidget {
+  final Map<String, dynamic> user;
+  const _CandidateDetailSheet({required this.user});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.8,
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          // 頂部標題
+          Row(
+            children: [
+              const Text(
+                '詳細資訊',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+          const Divider(),
+          // 詳細內容
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 基本資訊
+                  Center(
+                    child: Column(
+                      children: [
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundColor: Colors.orange.shade100,
+                          child: Text(
+                            user['name'][0],
+                            style: const TextStyle(
+                              fontSize: 40,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          user['name'],
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text('${user['age']} 歲'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  // 配對分析
+                  _buildSection(
+                    '配對分析',
+                    [
+                      '配對分數：${user['match']}%',
+                      '距離：${user['distance'].toStringAsFixed(1)} km',
+                      '共同興趣：${(user['interests'] as List).take(2).join(', ')}',
+                    ],
+                  ),
+                  // 興趣愛好
+                  _buildSection(
+                    '興趣愛好',
+                    (user['interests'] as List).cast<String>(),
+                  ),
+                  // 專長技能
+                  _buildSection(
+                    '專長技能',
+                    (user['skills'] as List).cast<String>(),
+                  ),
+                  // 個人介紹
+                  _buildSection(
+                    '個人介紹',
+                    [user['intro']],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // 底部按鈕
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('向 ${user['name']} 發送訊息')),
+                    );
+                  },
+                  icon: const Icon(Icons.message),
+                  label: const Text('發送訊息'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('向 ${user['name']} 發送交友邀請')),
+                    );
+                  },
+                  icon: const Icon(Icons.favorite),
+                  label: const Text('表示興趣'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepOrange,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSection(String title, List<String> items) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.deepOrange,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ...items.map((item) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('• '),
+              Expanded(child: Text(item)),
+            ],
+          ),
+        )),
+        const SizedBox(height: 16),
+      ],
     );
   }
 }
