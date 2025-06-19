@@ -137,43 +137,45 @@ class _QuickFeatureSection extends StatelessWidget {
   const _QuickFeatureSection();
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isWide = constraints.maxWidth >= 900;
-        return Column(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 16),
+          child: Text('快速功能',
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepOrange)),
+        ),
+        Row(
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Text('快速功能',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(color: Theme.of(context).colorScheme.primary)),
+            Expanded(
+              child: _QuickFeatureCard(
+                  icon: Icons.location_on, title: '附近的人', subtitle: '查看地圖'),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 2.2,
-                children: const [
-                  _QuickFeatureCard(
-                      icon: Icons.location_on, title: '附近的人', subtitle: '查看地圖'),
-                  _QuickFeatureCard(
-                      icon: Icons.shuffle, title: '隨機配對', subtitle: '找新朋友'),
-                  _QuickFeatureCard(
-                      icon: Icons.flag, title: '我的互助旗', subtitle: '編輯資料'),
-                  _QuickFeatureCard(
-                      icon: Icons.qr_code, title: '我的QR碼', subtitle: '分享資料'),
-                ],
-              ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _QuickFeatureCard(
+                  icon: Icons.shuffle, title: '隨機配對', subtitle: '找新朋友'),
             ),
           ],
-        );
-      },
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _QuickFeatureCard(
+                  icon: Icons.flag, title: '我的互助旗', subtitle: '編輯資料'),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _QuickFeatureCard(
+                  icon: Icons.qr_code, title: '我的QR碼', subtitle: '分享資料'),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
