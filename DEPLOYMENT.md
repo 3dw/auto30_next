@@ -20,9 +20,9 @@
 
 這個腳本會：
 - 檢查您的 Flutter 版本
-- 更新 workflow 配置
+- 更新 deploy-pages.yml 配置
 - 設置正確的 base href
-- 提供詳細的後續步驟
+- 提供簡單的後續步驟
 
 ### 2. 手動設置
 
@@ -48,7 +48,7 @@
 
 ```bash
 git add .
-git commit -m "Add GitHub Actions workflows"
+git commit -m "Setup GitHub Pages workflow"
 git push origin main
 ```
 
@@ -65,21 +65,12 @@ git push origin main
 成功部署後，您的應用將可在以下位置訪問：
 
 - **Web 版本**: `https://[username].github.io/auto30_next/`
-- **Android APK**: GitHub Releases 頁面
 
 ## 🛠️ Workflow 說明
 
-### CI Workflow (`ci.yml`)
-- 觸發：每次推送和 PR
-- 功能：代碼檢查、測試、構建測試版本
-
-### Deploy Workflow (`deploy.yml`)
-- 觸發：推送到 main 分支
-- 功能：構建 release 版本、創建 GitHub Release
-
-### Pages Workflow (`pages.yml`)
-- 觸發：推送到 main 分支
-- 功能：部署到 GitHub Pages
+### Deploy Pages Workflow (`deploy-pages.yml`)
+- 觸發：每次推送、PR 或手動執行
+- 功能：自動測試、分析、build 並部署到 GitHub Pages
 
 ## 🔧 故障排除
 
@@ -92,7 +83,7 @@ git push origin main
 
 #### 2. GitHub Pages 無法訪問
 - 確認 GitHub Pages 已啟用
-- 檢查 `pages.yml` workflow 是否成功執行
+- 檢查 `deploy-pages.yml` workflow 是否成功執行
 - 確認 base href 設置正確
 
 #### 3. 身份驗證失敗
@@ -103,37 +94,33 @@ git push origin main
 
 如果遇到問題：
 
-1. 檢查 [GitHub Actions 說明](.github/workflows/README.md)
-2. 查看 Actions 頁面的詳細日誌
-3. 確認所有設置步驟已完成
+1. 查看 Actions 頁面的詳細日誌
+2. 確認所有設置步驟已完成
 
 ## 📚 進階配置
 
 ### 自定義 Flutter 版本
 
-編輯 workflow 文件中的 `FLUTTER_VERSION`：
+編輯 `.github/workflows/deploy-pages.yml` 文件中的 `FLUTTER_VERSION`：
 
 ```yaml
 env:
   FLUTTER_VERSION: "3.32.4"  # 修改為您需要的版本
 ```
 
-### 添加新的構建目標
+### 修改 base href
 
-在 `deploy.yml` 中添加新的 job，例如 iOS 構建。
-
-### 修改部署條件
-
-調整 `if` 條件來控制何時觸發部署。
+如果您的倉庫名稱不是 `auto30_next`，請同步修改：
+- `web/index.html` 中的 `<base href="/your_repo/">`
+- `.github/workflows/deploy-pages.yml` 中的 `--base-href /your_repo/`
 
 ## 🎉 完成！
 
-恭喜！您的 Flutter 應用現在已經配置了完整的 CI/CD 流程。
+恭喜！您的 Flutter 應用現在已經配置了自動部署到 GitHub Pages 的流程。
 
-每次推送到 main 分支時，GitHub Actions 將自動：
+每次推送到 main/master 分支時，GitHub Actions 將自動：
 - 運行測試
-- 構建應用
+- 構建 Web 應用
 - 部署到 GitHub Pages
-- 創建新的 Release
 
 享受自動化部署的便利！ 
