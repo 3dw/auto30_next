@@ -189,6 +189,36 @@ class _QuickFeatureCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isWide = MediaQuery.of(context).size.width >= 900;
+    
+    // 根據標題決定導航目標
+    void _onTap() {
+      switch (title) {
+        case '附近的人':
+          // TODO: 導航到地圖頁面
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('附近的人功能開發中...')),
+          );
+          break;
+        case '隨機配對':
+          // TODO: 導航到配對頁面
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('隨機配對功能開發中...')),
+          );
+          break;
+        case '我的互助旗':
+          // TODO: 導航到互助旗編輯頁面
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('我的互助旗功能開發中...')),
+          );
+          break;
+        case '我的QR碼':
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const MyQrScreen()),
+          );
+          break;
+      }
+    }
+    
     return Card(
       color: isWide ? const Color(0xFFFFFCF7) : Theme.of(context).colorScheme.surface.withAlpha((0.7 * 255).toInt()),
       shape: RoundedRectangleBorder(
@@ -197,27 +227,31 @@ class _QuickFeatureCard extends StatelessWidget {
       ),
       elevation: isWide ? 4 : 1,
       shadowColor: isWide ? Colors.orange.withOpacity(0.12) : null,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Row(
-          children: [
-            Icon(icon, size: 32, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(title,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16)),
-                  Text(subtitle,
-                      style:
-                          const TextStyle(fontSize: 13, color: Colors.black54)),
-                ],
+      child: InkWell(
+        onTap: _onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Row(
+            children: [
+              Icon(icon, size: 32, color: Theme.of(context).colorScheme.primary),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(title,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text(subtitle,
+                        style:
+                            const TextStyle(fontSize: 13, color: Colors.black54)),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
