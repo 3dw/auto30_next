@@ -137,38 +137,43 @@ class _QuickFeatureSection extends StatelessWidget {
   const _QuickFeatureSection();
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Text('快速功能',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(color: Theme.of(context).colorScheme.primary)),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 2.2,
-            children: const [
-              _QuickFeatureCard(
-                  icon: Icons.location_on, title: '附近的人', subtitle: '查看地圖'),
-              _QuickFeatureCard(
-                  icon: Icons.shuffle, title: '隨機配對', subtitle: '找新朋友'),
-              _QuickFeatureCard(
-                  icon: Icons.flag, title: '我的互助旗', subtitle: '編輯資料'),
-              _QuickFeatureCard(
-                  icon: Icons.qr_code, title: '我的QR碼', subtitle: '分享資料'),
-            ],
-          ),
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth >= 900;
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Text('快速功能',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(color: Theme.of(context).colorScheme.primary)),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 2.2,
+                children: const [
+                  _QuickFeatureCard(
+                      icon: Icons.location_on, title: '附近的人', subtitle: '查看地圖'),
+                  _QuickFeatureCard(
+                      icon: Icons.shuffle, title: '隨機配對', subtitle: '找新朋友'),
+                  _QuickFeatureCard(
+                      icon: Icons.flag, title: '我的互助旗', subtitle: '編輯資料'),
+                  _QuickFeatureCard(
+                      icon: Icons.qr_code, title: '我的QR碼', subtitle: '分享資料'),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -181,10 +186,15 @@ class _QuickFeatureCard extends StatelessWidget {
       {required this.icon, required this.title, required this.subtitle});
   @override
   Widget build(BuildContext context) {
+    final isWide = MediaQuery.of(context).size.width >= 900;
     return Card(
-      color: Theme.of(context).colorScheme.surface.withAlpha((0.7 * 255).toInt()),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 1,
+      color: isWide ? const Color(0xFFFFFCF7) : Theme.of(context).colorScheme.surface.withAlpha((0.7 * 255).toInt()),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: isWide ? const BorderSide(color: Color(0xFFFF9800), width: 1.2) : BorderSide.none,
+      ),
+      elevation: isWide ? 4 : 1,
+      shadowColor: isWide ? Colors.orange.withOpacity(0.12) : null,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Row(

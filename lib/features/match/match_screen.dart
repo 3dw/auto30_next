@@ -373,29 +373,63 @@ class _MatchScreenState extends State<MatchScreen> {
         ],
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 24),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            FloatingActionButton(
-              heroTag: 'no',
-              backgroundColor: Colors.orange,
-              onPressed: _nextUser,
-              child: const Icon(Icons.close, size: 32),
+            SquareIconButton(
+              color: const Color(0xFFFF5722), // 紅色
+              icon: const Icon(Icons.close, color: Colors.white, size: 36),
+              onTap: _nextUser,
             ),
-            FloatingActionButton(
-              heroTag: 'info',
-              backgroundColor: Colors.orange,
-              onPressed: () => _showUserInfoBottomSheet(context),
-              child: const Icon(Icons.info_outline, size: 32),
+            SquareIconButton(
+              color: Colors.orange,
+              icon: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const Icon(Icons.info, color: Colors.orange, size: 24),
+                ],
+              ),
+              onTap: () => _showUserInfoBottomSheet(context),
             ),
-            FloatingActionButton(
-              heroTag: 'yes',
-              backgroundColor: Colors.orange,
-              onPressed: _matchSuccess,
-              child: const Icon(Icons.favorite, color: Colors.pink, size: 32),
+            SquareIconButton(
+              color: Colors.orange,
+              icon: const Icon(Icons.favorite, color: Colors.white, size: 32),
+              onTap: _matchSuccess,
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class SquareIconButton extends StatelessWidget {
+  final Color color;
+  final Widget icon;
+  final VoidCallback onTap;
+  const SquareIconButton({super.key, required this.color, required this.icon, required this.onTap});
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: color,
+      borderRadius: BorderRadius.circular(24),
+      elevation: 6,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: onTap,
+        child: SizedBox(
+          width: 72,
+          height: 72,
+          child: Center(child: icon),
         ),
       ),
     );
