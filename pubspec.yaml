@@ -66,6 +66,7 @@ dependencies:
   path: ^1.8.3
   http: ^1.1.2
   qr_flutter: ^4.1.0
+  firebase_database: ^11.3.7
 
 dev_dependencies:
   flutter_test:
