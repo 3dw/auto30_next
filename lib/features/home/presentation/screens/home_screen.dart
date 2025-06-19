@@ -5,6 +5,9 @@ import 'package:auto30_next/features/learning_center/presentation/screens/learni
 import 'package:auto30_next/features/quick_practice/presentation/screens/quick_practice_screen.dart';
 import 'package:auto30_next/features/qr/presentation/screens/my_qr_screen.dart';
 import 'package:auto30_next/features/social/presentation/screens/social_main_screen.dart';
+import 'package:auto30_next/features/map/map_screen.dart';
+import 'package:auto30_next/features/profile/profile_screen.dart';
+import 'package:auto30_next/features/match/match_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -194,21 +197,18 @@ class _QuickFeatureCard extends StatelessWidget {
     void _onTap() {
       switch (title) {
         case '附近的人':
-          // TODO: 導航到地圖頁面
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('附近的人功能開發中...')),
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const MapScreen()),
           );
           break;
         case '隨機配對':
-          // TODO: 導航到配對頁面
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('隨機配對功能開發中...')),
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const MatchScreen()),
           );
           break;
         case '我的互助旗':
-          // TODO: 導航到互助旗編輯頁面
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('我的互助旗功能開發中...')),
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const ProfileScreen()),
           );
           break;
         case '我的QR碼':
