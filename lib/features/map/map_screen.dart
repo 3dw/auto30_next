@@ -57,6 +57,11 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 篩選後的用戶
+    final filteredUsers = filterIndex == 0
+        ? users
+        : users.where((u) => u['type'] == filters[filterIndex]).toList();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange,
@@ -75,180 +80,223 @@ class _MapScreenState extends State<MapScreen> {
       ),
       body: Column(
         children: [
+          // 篩選區
           Container(
-            color: Colors.orange[50],
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  spreadRadius: 1,
+                  blurRadius: 3,
+                ),
+              ],
+            ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  children: const [
-                    Icon(Icons.location_on, color: Colors.orange),
-                    SizedBox(width: 8),
-                    Text('附近的學習夥伴',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 18)),
+                  children: [
+                    const Icon(Icons.location_on, color: Colors.orange),
+                    const SizedBox(width: 8),
+                    const Text(
+                      '附近的學習夥伴',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.my_location, color: Colors.orange),
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('定位中...')),
+                        );
+                      },
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
-                Row(
-                  children: List.generate(filters.length, (i) {
-                    final selected = filterIndex == i;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor:
-                              selected ? Colors.orange : Colors.white,
-                          foregroundColor:
-                              selected ? Colors.white : Colors.orange,
-                          side: BorderSide(
-                              color:
-                                  Colors.orange.withOpacity(selected ? 0 : 1)),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24)),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: List.generate(filters.length, (i) {
+                      final selected = filterIndex == i;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: FilterChip(
+                          label: Text(filters[i]),
+                          selected: selected,
+                          onSelected: (selected) {
+                            setState(() => filterIndex = i);
+                          },
+                          selectedColor: Colors.orange.shade100,
+                          checkmarkColor: Colors.orange,
                         ),
-                        onPressed: () => setState(() => filterIndex = i),
-                        child: Text(filters[i]),
-                      ),
-                    );
-                  }),
+                      );
+                    }),
+                  ),
                 ),
               ],
             ),
           ),
-          // 假地圖區
+          // 地圖區
           Expanded(
             flex: 2,
-            child: Stack(
-              children: [
-                Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.only(top: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.orange[100],
-                    borderRadius: BorderRadius.circular(16),
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                border: Border.all(color: Colors.orange.shade200),
+              ),
+              child: Stack(
+                children: [
+                  // 背景地圖樣式
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.orange.shade100, Colors.orange.shade200],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
                   ),
-                  child: const Center(
-                      child: Text('（地圖區，僅示意）',
-                          style:
-                              TextStyle(color: Colors.orange, fontSize: 16))),
-                ),
-                // 假標記
-                ...List.generate(users.length, (i) {
-                  final user = users[i];
-                  return Positioned(
-                    left: 60.0 + i * 30,
-                    top: 60.0 + (i % 2) * 40,
+                  // 假標記
+                  ...List.generate(filteredUsers.length, (i) {
+                    final user = filteredUsers[i];
+                    return Positioned(
+                      left: 60.0 + i * 30,
+                      top: 60.0 + (i % 2) * 40,
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: user['color'],
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: Colors.white, width: 2),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  spreadRadius: 1,
+                                  blurRadius: 3,
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.person,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  spreadRadius: 1,
+                                  blurRadius: 2,
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              user['name'],
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                  // 我的位置標記
+                  const Positioned(
+                    left: 180,
+                    top: 120,
+                    child: _MyLocationMarker(),
+                  ),
+                  // 地圖控制按鈕
+                  Positioned(
+                    bottom: 16,
+                    right: 16,
                     child: Column(
                       children: [
-                        CircleAvatar(
-                          backgroundColor: user['color'],
-                          child: const Icon(Icons.person, color: Colors.white),
+                        FloatingActionButton.small(
+                          heroTag: "zoom_in",
+                          onPressed: () {},
+                          backgroundColor: Colors.orange,
+                          child: const Icon(Icons.zoom_in, color: Colors.white),
                         ),
-                        Container(
-                          margin: const EdgeInsets.only(top: 2),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: [
-                              BoxShadow(color: Colors.black12, blurRadius: 2)
-                            ],
-                          ),
-                          child: Text(user['name'],
-                              style: const TextStyle(fontSize: 12)),
+                        const SizedBox(height: 8),
+                        FloatingActionButton.small(
+                          heroTag: "zoom_out",
+                          onPressed: () {},
+                          backgroundColor: Colors.orange,
+                          child: const Icon(Icons.zoom_out, color: Colors.white),
                         ),
                       ],
                     ),
-                  );
-                }),
-                // 我的定位
-                const Positioned(
-                  left: 180,
-                  top: 120,
-                  child: Column(
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: Colors.deepOrange,
-                        child: Icon(Icons.my_location, color: Colors.white),
-                      ),
-                      SizedBox(height: 2),
-                      Text('我的位置',
-                          style: TextStyle(
-                              fontSize: 12, color: Colors.deepOrange)),
-                    ],
                   ),
-                ),
-                // 右側功能按鈕
-                Positioned(
-                  right: 12,
-                  bottom: 12,
-                  child: Column(
-                    children: [
-                      FloatingActionButton(
-                        mini: true,
-                        backgroundColor: Colors.orange,
-                        onPressed: () {},
-                        child: const Icon(Icons.add),
-                      ),
-                      const SizedBox(height: 8),
-                      FloatingActionButton(
-                        mini: true,
-                        backgroundColor: Colors.orange,
-                        onPressed: () {},
-                        child: const Icon(Icons.grid_view_rounded),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           // 附近用戶列表
           Expanded(
-            flex: 2,
+            flex: 1,
             child: Container(
-              color: Colors.white,
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Text('附近用戶 (${users.length})',
-                        style: const TextStyle(
-                            color: Colors.orange,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16)),
+                  Text(
+                    '附近用戶 (${filteredUsers.length})',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.deepOrange,
+                    ),
                   ),
+                  const SizedBox(height: 8),
                   Expanded(
-                    child: ListView.separated(
-                      itemCount: users.length,
-                      separatorBuilder: (_, __) => const Divider(height: 1),
+                    child: ListView.builder(
+                      itemCount: filteredUsers.length,
                       itemBuilder: (context, i) {
-                        final user = users[i];
-                        return ListTile(
-                          leading: CircleAvatar(
+                        final user = filteredUsers[i];
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 2),
+                          child: ListTile(
+                            leading: CircleAvatar(
                               backgroundColor: user['color'],
-                              child: const Icon(Icons.person,
-                                  color: Colors.white)),
-                          title: Text('${user['name']} (${user['age']}歲)',
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold)),
-                          subtitle: Text('${user['distance']}・${user['tag']}'),
-                          trailing: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: user['color'].withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(8),
+                              child: const Icon(Icons.person, color: Colors.white),
                             ),
-                            child: Text(user['type'],
+                            title: Text(
+                              '${user['name']} (${user['age']}歲)',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Text('${user['distance']}・${user['tag']}'),
+                            trailing: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: user['color'].withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                user['type'],
                                 style: TextStyle(
-                                    color: user['color'],
-                                    fontWeight: FontWeight.bold)),
+                                  color: user['color'],
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                           ),
                         );
                       },
@@ -260,6 +308,54 @@ class _MapScreenState extends State<MapScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _MyLocationMarker extends StatelessWidget {
+  const _MyLocationMarker();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          width: 50,
+          height: 50,
+          decoration: BoxDecoration(
+            color: Colors.deepOrange,
+            borderRadius: BorderRadius.circular(25),
+            border: Border.all(color: Colors.white, width: 3),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                spreadRadius: 2,
+                blurRadius: 5,
+              ),
+            ],
+          ),
+          child: const Icon(
+            Icons.my_location,
+            color: Colors.white,
+            size: 30,
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+          decoration: BoxDecoration(
+            color: Colors.deepOrange,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: const Text(
+            '我的位置',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
