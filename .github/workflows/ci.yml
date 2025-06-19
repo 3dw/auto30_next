@@ -2,20 +2,21 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
 
 env:
   FLUTTER_VERSION: "3.32.4"
-  GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
 
 jobs:
-  build:
+  test:
+    name: Test and Analyze
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
@@ -38,22 +39,8 @@ jobs:
     - name: Run tests
       run: flutter test
 
-    - name: Build APK
-      run: flutter build apk --release
+    - name: Build APK (for testing)
+      run: flutter build apk --debug
 
-    - name: Build Web
-      run: flutter build web --release
-      env:
-        GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: release-apk
-        path: build/app/outputs/flutter-apk/app-release.apk
-
-    - name: Upload Web Build
-      uses: actions/upload-artifact@v4
-      with:
-        name: web-build
-        path: build/web 
+    - name: Build Web (for testing)
+      run: flutter build web --debug 
