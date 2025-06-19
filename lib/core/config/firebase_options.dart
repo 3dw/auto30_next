@@ -20,13 +20,14 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBx6qx-v9Fnd72sWnNAwarmFWi-91ypA1Y',
-    appId: '1:701444204172:web:c138f756e9b73b9113bda9',
-    messagingSenderId: '701444204172',
-    projectId: 'auto30next-56a1a',
-    authDomain: 'auto30next-56a1a.firebaseapp.com',
-    storageBucket: 'auto30next-56a1a.appspot.com',
-    measurementId: 'G-679XL5GVLT',
+    apiKey: 'AIzaSyBu6ps0axwxUgh2xUoLgTdMtGgnwaY_VNo',
+    appId: '1:270389952986:web:5454756eafe52a645c80e3',
+    messagingSenderId: '270389952986',
+    projectId: 'shackhand-autolearn',
+    authDomain: 'shackhand-autolearn.firebaseapp.com',
+    storageBucket: 'shackhand-autolearn.appspot.com',
+    databaseURL: 'https://shackhand-autolearn-auto30.firebaseio.com',
+    measurementId: 'G-G06K7WVJ9R',
   );
 
   // 稍後我們會添加 android 和 ios 的配置
@@ -34,16 +35,16 @@ class DefaultFirebaseOptions {
     apiKey: 'YOUR-ANDROID-API-KEY',
     appId: 'YOUR-ANDROID-APP-ID',
     messagingSenderId: 'YOUR-ANDROID-MESSAGING-SENDER-ID',
-    projectId: 'auto30next-56a1a',
-    storageBucket: 'auto30next-56a1a.appspot.com',
+    projectId: 'shackhand-autolearn',
+    storageBucket: 'shackhand-autolearn.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'YOUR-IOS-API-KEY',
     appId: 'YOUR-IOS-APP-ID',
     messagingSenderId: 'YOUR-IOS-MESSAGING-SENDER-ID',
-    projectId: 'auto30next-56a1a',
-    storageBucket: 'auto30next-56a1a.appspot.com',
+    projectId: 'shackhand-autolearn',
+    storageBucket: 'shackhand-autolearn.appspot.com',
     iosClientId: 'YOUR-IOS-CLIENT-ID',
     iosBundleId: 'com.auto30.auto30Next',
   );

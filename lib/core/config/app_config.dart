@@ -4,7 +4,7 @@ class AppConfig {
   static const String googleClientId = String.fromEnvironment(
     'GOOGLE_CLIENT_ID',
     defaultValue:
-        '701444204172-go0c55sc57ph6ltt4kacip6ofn7fb1ud.apps.googleusercontent.com',
+        '270389952986-ieilk8oot9an611crndg2ijobv88pokt.apps.googleusercontent.com',
   );
 
   // 其他配置項可以加在這裡
