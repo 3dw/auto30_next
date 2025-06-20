@@ -2,6 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:intl/intl.dart';
+import 'package:latlong2/latlong.dart';
+import 'location_picker_screen.dart';
+
+// Helper function to safely parse coordinate values.
+double _parseCoordinate(dynamic value) {
+  if (value is String) {
+    return double.tryParse(value) ?? 0.0;
+  }
+  if (value is num) {
+    return value.toDouble();
+  }
+  return 0.0;
+}
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -106,8 +119,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         
         if (data['latlngColumn'] != null && data['latlngColumn']['lat'] != null && data['latlngColumn']['lng'] != null) {
           _latlng = {
-            'lat': (data['latlngColumn']['lat'] as num).toDouble(),
-            'lng': (data['latlngColumn']['lng'] as num).toDouble(),
+            'lat': _parseCoordinate(data['latlngColumn']['lat']),
+            'lng': _parseCoordinate(data['latlngColumn']['lng']),
           };
         }
         
@@ -270,13 +283,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Text('座標: ${_latlng!['lat']!.toStringAsFixed(4)}, ${_latlng!['lng']!.toStringAsFixed(4)}'),
                       ),
-                    ElevatedButton(onPressed: () {
-                      // TODO: Navigate to map screen to select location
-                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('選擇地圖座標功能開發中')),
-                      );
-                    }, child: const Text('在地圖上設定位置')),
+                    ElevatedButton(
+                        onPressed: () async {
+                          final result = await Navigator.push<LatLng?>(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => LocationPickerScreen(
+                                  initialLocation: _latlng != null
+                                      ? LatLng(_latlng!['lat']!, _latlng!['lng']!)
+                                      : null),
+                            ),
+                          );
 
+                          if (result != null) {
+                            setState(() {
+                              _latlng = {
+                                'lat': result.latitude,
+                                'lng': result.longitude,
+                              };
+                            });
+                          }
+                        },
+                        child: const Text('在地圖上設定位置')),
 
                     _buildSectionTitle('聯絡與連結'),
                     TextFormField(
