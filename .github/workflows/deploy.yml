@@ -35,16 +35,6 @@ jobs:
     - name: Install dependencies
       run: flutter pub get
 
-    - name: Create config files
-      run: |
-        cp lib/core/config/app_config.dart.example lib/core/config/app_config.dart
-        cp lib/core/config/firebase_options.dart.example lib/core/config/firebase_options.dart
-        sed -i 's/YOUR_GOOGLE_CLIENT_ID_HERE/${{ secrets.GOOGLE_CLIENT_ID }}/g' lib/core/config/app_config.dart
-        sed -i 's/YOUR_WEB_API_KEY_HERE/${{ secrets.FIREBASE_API_KEY }}/g' lib/core/config/firebase_options.dart
-        sed -i 's/YOUR_WEB_APP_ID_HERE/${{ secrets.FIREBASE_APP_ID }}/g' lib/core/config/firebase_options.dart
-        sed -i 's/YOUR_MESSAGING_SENDER_ID_HERE/${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}/g' lib/core/config/firebase_options.dart
-        sed -i 's/YOUR_MEASUREMENT_ID_HERE/${{ secrets.FIREBASE_MEASUREMENT_ID }}/g' lib/core/config/firebase_options.dart
-
     - name: Build Web
       run: flutter build web --release --base-href /auto30_next/
       env:
