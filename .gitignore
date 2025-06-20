@@ -47,5 +47,5 @@ lib/core/config/firebase_options.dart
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
 
-# 忽略應用程式配置檔 ,之後要再建立新的app_config.dart
+# 忽略應用程式配置檔
 lib/core/config/app_config.dart
