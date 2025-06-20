@@ -36,10 +36,10 @@ class _HomeAppBar extends StatelessWidget {
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
       ),
       actions: [
-        IconButton(
-          icon: const Icon(Icons.grid_view_rounded),
-          onPressed: () {},
-        ),
+        // IconButton(
+        //   icon: const Icon(Icons.grid_view_rounded),
+        //   onPressed: () {},
+        // ),
         IconButton(
           icon: const Icon(Icons.qr_code),
           onPressed: () {
