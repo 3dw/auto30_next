@@ -53,10 +53,10 @@ fvm flutter pub get
 flutter run
 ```
 
-or (if using fvm 來切換Flutter版本)
+or (if using fvm 來切換Flutter版本，且要能google登入)
 
 ```
-fvm flutter run
+fvm flutter run -d chrome --web-port=8000
 ```
 
 ## Project Structure
