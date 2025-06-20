@@ -75,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             color: Colors.red,
                             fontWeight: FontWeight.bold)),
                     SizedBox(height: 8),
-                    Text('開始你的自主學習互助之旅 ',
+                    Text('一起開始你的自主學習互助之旅 ',
                         style: TextStyle(fontSize: 16, color: Colors.black38)),
                   ],
                 ),
