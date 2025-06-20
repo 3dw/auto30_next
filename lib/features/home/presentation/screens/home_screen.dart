@@ -486,18 +486,71 @@ class _UserMenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<String>(
-      icon: const Icon(Icons.account_circle_rounded),
+      icon: const Icon(Icons.account_circle_rounded, color: Colors.white),
       onSelected: (value) async {
-        if (value == 'logout') {
-          await context.read<AuthProvider>().signOut();
+        switch (value) {
+          case 'profile':
+            // 跳轉到個人資料頁
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ProfileScreen(),
+              ),
+            );
+            break;
+          case 'logout':
+            // 顯示登出確認對話框
+            _showLogoutDialog(context);
+            break;
         }
       },
-      itemBuilder: (context) => [
+      itemBuilder: (BuildContext context) => [
+        const PopupMenuItem<String>(
+          value: 'profile',
+          child: Row(
+            children: [
+              Icon(Icons.person, color: Colors.orange),
+              SizedBox(width: 8),
+              Text('個人資料'),
+            ],
+          ),
+        ),
         const PopupMenuItem<String>(
           value: 'logout',
-          child: Text('登出'),
+          child: Row(
+            children: [
+              Icon(Icons.logout, color: Colors.red),
+              SizedBox(width: 8),
+              Text('登出'),
+            ],
+          ),
         ),
       ],
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('確認登出'),
+          content: const Text('確定要登出嗎？'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await context.read<AuthProvider>().signOut();
+              },
+              child: const Text('登出'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
