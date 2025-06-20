@@ -35,6 +35,12 @@ cd auto30_next
 flutter pub get
 ```
 
+or (if using fvm 來切換Flutter版本)
+
+```
+fvm flutter pub get
+```
+
 3. Configure Firebase:
    - Create a new Firebase project
    - Add Android and iOS apps to your Firebase project
@@ -45,6 +51,12 @@ flutter pub get
 4. Run the app:
 ```bash
 flutter run
+```
+
+or (if using fvm 來切換Flutter版本)
+
+```
+fvm flutter run
 ```
 
 ## Project Structure
