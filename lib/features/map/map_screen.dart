@@ -53,20 +53,14 @@ class UserModel {
   required this.location});
 
   factory UserModel.fromFirebase(String id, Map<String, dynamic> data) {
-    print('data: $data');
-
-    // Parse latlngColumn string format: "24.819444,120.960278"
-    final latlngString = data['latlngColumn'] as String;
-    final coordinates = latlngString.split(',');
-    
     return UserModel(
       id: id,
       name: data['name'] ?? 'Unknown User',
       learnerBirth: data['learner_birth'] ?? '1980',
       learnerHabit: data['learner_habit'] ?? '未知',
       location: LatLng(
-        _parseCoordinate(coordinates[0].trim()),
-        _parseCoordinate(coordinates[1].trim()),
+        _parseCoordinate(data['latlngColumn']['lat']),
+        _parseCoordinate(data['latlngColumn']['lng']),
       ),
     );
   }
@@ -141,8 +135,9 @@ class _MapScreenState extends State<MapScreen> {
         if (value is Map) {
           final userData = value as Map<String, dynamic>;
           if (userData['latlngColumn'] != null &&
-              userData['latlngColumn'] is String &&
-              userData['latlngColumn'].toString().contains(',')) {
+              userData['latlngColumn'] is Map &&
+              userData['latlngColumn']['lat'] != null &&
+              userData['latlngColumn']['lng'] != null) {
             users.add(UserModel.fromFirebase(key, userData));
           }
         }
