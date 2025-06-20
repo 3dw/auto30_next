@@ -23,6 +23,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _site2Controller = TextEditingController();
   final _noteController = TextEditingController();
   final _priceController = TextEditingController();
+  
+  // Controllers for custom, user-entered text
+  final _customHabitsController = TextEditingController();
+  final _customSharesController = TextEditingController();
+  final _customAsksController = TextEditingController();
 
   DateTime? _selectedBirthDate;
   
@@ -55,6 +60,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _loadUserData();
   }
 
+  List<String> _parseList(dynamic data) {
+    if (data == null) return [];
+    if (data is List) return List<String>.from(data.map((e) => e.toString()));
+    if (data is String) return data.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    return [];
+  }
+
   Future<void> _loadUserData() async {
     final user = _auth.currentUser;
     if (user == null) return;
@@ -75,7 +87,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _noteController.text = data['note'] ?? '';
         _priceController.text = data['price'] ?? '';
 
-        if (data['learner_birth'] != null) {
+        if (data['learner_birth'] != null && data['learner_birth'].toString().isNotEmpty) {
           try {
             _selectedBirthDate = DateTime.parse(data['learner_birth']);
           } catch(e) {
@@ -83,10 +95,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
         }
         
-        _selectedHabits = List<String>.from(data['learner_habit'] ?? []);
-        _selectedShares = List<String>.from(data['share'] ?? []);
-        _selectedAsks = List<String>.from(data['ask'] ?? []);
+        _selectedHabits = _parseList(data['learner_habit']);
+        _selectedShares = _parseList(data['share']);
+        _selectedAsks = _parseList(data['ask']);
 
+        // Separate pre-defined from custom for editing in text fields
+        _customHabitsController.text = _selectedHabits.where((h) => !_availableHabits.contains(h)).join(', ');
+        _customSharesController.text = _selectedShares.where((s) => !_availableShares.contains(s)).join(', ');
+        _customAsksController.text = _selectedAsks.where((a) => !_availableAsks.contains(a)).join(', ');
+        
         if (data['latlngColumn'] != null && data['latlngColumn']['lat'] != null && data['latlngColumn']['lng'] != null) {
           _latlng = {
             'lat': (data['latlngColumn']['lat'] as num).toDouble(),
@@ -137,6 +154,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() => _isLoading = true);
 
     try {
+      // Helper to combine selections from chips and custom text fields
+      List<String> getFinalList(List<String> selected, List<String> available, TextEditingController customController) {
+        final fromChips = selected.where((s) => available.contains(s));
+        final fromText = customController.text.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty);
+        return {...fromChips, ...fromText}.toList();
+      }
+
       final data = {
         'name': _nameController.text,
         'address': _addressController.text,
@@ -146,9 +170,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'note': _noteController.text,
         'price': _priceController.text,
         'learner_birth': _selectedBirthDate != null ? DateFormat('yyyy-MM-dd').format(_selectedBirthDate!) : null,
-        'learner_habit': _selectedHabits,
-        'share': _selectedShares,
-        'ask': _selectedAsks,
+        'learner_habit': getFinalList(_selectedHabits, _availableHabits, _customHabitsController),
+        'share': getFinalList(_selectedShares, _availableShares, _customSharesController),
+        'ask': getFinalList(_selectedAsks, _availableAsks, _customAsksController),
         'latlngColumn': _latlng != null ? { 'lat': _latlng!['lat'], 'lng': _latlng!['lng'] } : null,
         'lastUpdate': ServerValue.timestamp,
         'email': user.email,
@@ -282,16 +306,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _buildChipSelector(_availableHabits, _selectedHabits, (selected) {
                       setState(() => _updateSelection(_selectedHabits, selected));
                     }),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _customHabitsController,
+                      decoration: const InputDecoration(
+                        labelText: '其他興趣 (請用逗號,分隔)',
+                        hintText: '例如: 哲學, 自主學習',
+                      ),
+                    ),
 
                     _buildSectionTitle('我能分享的 (share)'),
                      _buildChipSelector(_availableShares, _selectedShares, (selected) {
                       setState(() => _updateSelection(_selectedShares, selected));
                     }),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _customSharesController,
+                      decoration: const InputDecoration(
+                        labelText: '其他分享 (請用逗號,分隔)',
+                      ),
+                    ),
 
                     _buildSectionTitle('我想學習的 (ask)'),
                      _buildChipSelector(_availableAsks, _selectedAsks, (selected) {
                       setState(() => _updateSelection(_selectedAsks, selected));
                     }),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _customAsksController,
+                      decoration: const InputDecoration(
+                        labelText: '其他想學的 (請用逗號,分隔)',
+                      ),
+                    ),
                     
                     _buildSectionTitle('收費說明 (price)'),
                     TextFormField(
@@ -363,6 +409,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _site2Controller.dispose();
     _noteController.dispose();
     _priceController.dispose();
+    _customHabitsController.dispose();
+    _customSharesController.dispose();
+    _customAsksController.dispose();
     super.dispose();
   }
 }
