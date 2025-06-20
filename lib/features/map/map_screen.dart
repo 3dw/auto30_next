@@ -42,9 +42,15 @@ Map<String, dynamic> _convertMap(Map<dynamic, dynamic> originalMap) {
 class UserModel {
   final String id;
   final String name;
+  final String learnerBirth;
+  final String learnerHabit;
   final LatLng location;
 
-  UserModel({required this.id, required this.name, required this.location});
+  UserModel({required this.id, 
+  required this.name, 
+  required this.learnerBirth, 
+  required this.learnerHabit, 
+  required this.location});
 
   factory UserModel.fromFirebase(String id, Map<String, dynamic> data) {
     print('data: $data');
@@ -56,6 +62,8 @@ class UserModel {
     return UserModel(
       id: id,
       name: data['name'] ?? 'Unknown User',
+      learnerBirth: data['learner_birth'] ?? '1980',
+      learnerHabit: data['learner_habit'] ?? '未知',
       location: LatLng(
         _parseCoordinate(coordinates[0].trim()),
         _parseCoordinate(coordinates[1].trim()),
@@ -238,6 +246,11 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Widget _buildUserInfoSheet(UserModel user) {
+
+    final learnerBirth = user.learnerBirth;
+    final currentYear = DateTime.now().year;
+    final age = currentYear - int.parse(learnerBirth);
+  
     return Container(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -250,8 +263,15 @@ class _MapScreenState extends State<MapScreen> {
           ),
           const SizedBox(height: 8),
           // You can fetch more user details here if needed
-          Text('ID: ${user.id}'),
-          Text('座標: ${user.location.latitude.toStringAsFixed(4)}, ${user.location.longitude.toStringAsFixed(4)}'),
+          // Text('ID: ${user.id}'),
+          // Text('座標: ${user.location.latitude.toStringAsFixed(4)}, ${user.location.longitude.toStringAsFixed(4)}'),
+
+          // 用learner_birth(西元年) 來計算年齡
+          Text('年齡:約 $age 歲'),
+
+          Text('興趣: ${user.learnerHabit}'),
+
+
           const SizedBox(height: 16),
           ElevatedButton(
             child: const Text('查看完整資料'),
