@@ -154,11 +154,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Helper to combine selections from chips and custom text fields
-      List<String> getFinalList(List<String> selected, List<String> available, TextEditingController customController) {
+      // Helper to combine selections from chips and custom text fields and convert to a string
+      String getFinalString(List<String> selected, List<String> available, TextEditingController customController) {
         final fromChips = selected.where((s) => available.contains(s));
         final fromText = customController.text.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty);
-        return {...fromChips, ...fromText}.toList();
+        return {...fromChips, ...fromText}.toList().join(', ');
       }
 
       final data = {
@@ -170,9 +170,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'note': _noteController.text,
         'price': _priceController.text,
         'learner_birth': _selectedBirthDate != null ? DateFormat('yyyy-MM-dd').format(_selectedBirthDate!) : null,
-        'learner_habit': getFinalList(_selectedHabits, _availableHabits, _customHabitsController),
-        'share': getFinalList(_selectedShares, _availableShares, _customSharesController),
-        'ask': getFinalList(_selectedAsks, _availableAsks, _customAsksController),
+        'learner_habit': getFinalString(_selectedHabits, _availableHabits, _customHabitsController),
+        'share': getFinalString(_selectedShares, _availableShares, _customSharesController),
+        'ask': getFinalString(_selectedAsks, _availableAsks, _customAsksController),
         'latlngColumn': _latlng != null ? { 'lat': _latlng!['lat'], 'lng': _latlng!['lng'] } : null,
         'lastUpdate': ServerValue.timestamp,
         'email': user.email,
@@ -234,6 +234,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ? const Center(child: CircularProgressIndicator())
           : Form(
               key: _formKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
