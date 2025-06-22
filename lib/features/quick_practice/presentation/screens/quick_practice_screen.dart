@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class QuickPracticeScreen extends StatefulWidget {
   const QuickPracticeScreen({super.key});
@@ -139,7 +140,13 @@ class _QuickPracticeScreenState extends State<QuickPracticeScreen> {
         title: const Text('💻 快速練習'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/');
+            }
+          },
         ),
         actions: [
           IconButton(

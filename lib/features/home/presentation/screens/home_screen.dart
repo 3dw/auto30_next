@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:auto30_next/features/auth/presentation/providers/auth_provider.dart';
 import 'package:auto30_next/features/learning_center/presentation/screens/learning_center_screen.dart';
 import 'package:auto30_next/features/quick_practice/presentation/screens/quick_practice_screen.dart';
@@ -43,9 +44,7 @@ class _HomeAppBar extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.qr_code),
           onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const MyQrScreen()),
-            );
+            context.push('/qr');
           },
         ),
         _UserMenuButton(),
@@ -197,24 +196,16 @@ class _QuickFeatureCard extends StatelessWidget {
     void _onTap() {
       switch (title) {
         case '附近的人':
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const MapScreen()),
-          );
+          context.push('/map');
           break;
         case '隨機配對':
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const MatchScreen()),
-          );
+          context.push('/match');
           break;
         case '我的互助旗':
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const ProfileScreen()),
-          );
+          context.push('/profile');
           break;
         case '我的QR碼':
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const MyQrScreen()),
-          );
+          context.push('/qr');
           break;
       }
     }

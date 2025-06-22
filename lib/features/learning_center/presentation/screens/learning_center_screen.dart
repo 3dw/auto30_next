@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class LearningCenterScreen extends StatelessWidget {
   const LearningCenterScreen({super.key});
@@ -14,7 +15,13 @@ class LearningCenterScreen extends StatelessWidget {
         title: const Text('📚 學習中心'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/');
+            }
+          },
         ),
       ),
       body: SingleChildScrollView(

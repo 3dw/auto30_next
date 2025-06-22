@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
 
 class MyQrScreen extends StatefulWidget {
@@ -39,7 +40,13 @@ class _MyQrScreenState extends State<MyQrScreen> with TickerProviderStateMixin {
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/');
+            }
+          },
         ),
         bottom: TabBar(
           controller: _tabController,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class MatchScreen extends StatefulWidget {
   const MatchScreen({super.key});
@@ -111,7 +112,13 @@ class _MatchScreenState extends State<MatchScreen> with TickerProviderStateMixin
         title: const Text('自學社交平台'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).maybePop(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/');
+            }
+          },
         ),
         actions: [
           IconButton(

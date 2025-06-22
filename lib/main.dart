@@ -4,9 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:auto30_next/core/config/app_config.dart';
 import 'package:auto30_next/core/theme/app_theme.dart';
 import 'package:auto30_next/features/auth/presentation/providers/auth_provider.dart';
-import 'package:auto30_next/features/home/presentation/screens/home_screen.dart';
-import 'package:auto30_next/features/auth/presentation/screens/login_screen.dart';
 import 'package:auto30_next/core/config/firebase_options.dart';
+import 'package:auto30_next/core/config/app_router.dart';
 
 void main() async {
   try {
@@ -50,18 +49,18 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         // Add other providers here
       ],
-      child: MaterialApp(
-        title: AppConfig.appName,
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.system,
-        home: Consumer<AuthProvider>(
-          builder: (context, authProvider, _) {
-            return authProvider.isAuthenticated
-                ? const HomeScreen()
-                : const LoginScreen();
-          },
-        ),
+      child: Consumer<AuthProvider>(
+        builder: (context, authProvider, _) {
+          final router = AppRouter.createRouter(authProvider);
+          
+          return MaterialApp.router(
+            title: AppConfig.appName,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: ThemeMode.system,
+            routerConfig: router,
+          );
+        },
       ),
     );
   }

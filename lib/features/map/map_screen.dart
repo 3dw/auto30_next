@@ -4,6 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:go_router/go_router.dart';
 
 // iOS:
 // Please add the following keys to your Info.plist file.
@@ -73,7 +74,8 @@ class UserModel {
 }
 
 class MapScreen extends StatefulWidget {
-  const MapScreen({super.key});
+  final String? latlng;
+  const MapScreen({super.key, this.latlng});
 
   @override
   State<MapScreen> createState() => _MapScreenState();
@@ -117,14 +119,41 @@ class _MapScreenState extends State<MapScreen> {
     } 
 
     try {
-      final position = await Geolocator.getCurrentPosition();
-      setState(() {
-        _currentPosition = position;
-        _mapController.move(
-          LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-          13.0,
-        );
-      });
+
+      if (widget.latlng != null) {
+        final latlng = widget.latlng!.split(',');
+        print('latlng: $latlng');
+
+        // 設定當前位置
+        setState(() {
+          _currentPosition = Position(
+            latitude: _parseCoordinate(latlng[0]),
+            longitude: _parseCoordinate(latlng[1]),
+            timestamp: DateTime.now(),
+            accuracy: 10,
+            altitude: 0,  
+            altitudeAccuracy: 0,
+            heading: 0,
+            headingAccuracy: 0,
+            speed: 0,
+            speedAccuracy: 0,
+          );  
+          _mapController.move(
+            LatLng(_parseCoordinate(latlng[0]), _parseCoordinate(latlng[1])),
+            13.0,
+          );
+
+        });
+      } else {
+        final position = await Geolocator.getCurrentPosition();
+        setState(() {
+          _currentPosition = position;
+          _mapController.move(
+            LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+            13.0,
+          );
+        });
+      }
     } catch (e) {
       print("Failed to get current position: $e");
     }
@@ -157,6 +186,16 @@ class _MapScreenState extends State<MapScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('地圖'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/');
+            }
+          },
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.my_location),
@@ -276,11 +315,8 @@ class _MapScreenState extends State<MapScreen> {
           ElevatedButton(
             child: const Text('查看完整資料'),
             onPressed: () {
-              // TODO: Navigate to this user's profile screen
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('查看用戶資料功能開發中')),
-              );
+              context.push('/user/${user.id}');
             },
           )
         ],
