@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter/foundation.dart';
 
 class UserModel {
   final String id;
@@ -170,12 +172,32 @@ class _MatchScreenState extends State<MatchScreen> {
     setState(() {});
   }
 
+  Future<void> saveMatchRecord(String myUid, String otherUid, String matchType, int score) async {
+    final ref = FirebaseDatabase.instance.ref('matches/$myUid/$otherUid');
+    await ref.set({
+      'matchType': matchType,
+      'score': score,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final modeNames = ['興趣配對', '位置配對', '技能配對', '隨機配對'];
     return Scaffold(
       appBar: AppBar(
         title: const Text('智能配對'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const MatchHistoryScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -204,7 +226,13 @@ class _MatchScreenState extends State<MatchScreen> {
                     child: Center(
                       child: _UserCard(
                         user: candidates[currentIndex],
-                        onLike: () {
+                        matchScore: _getMatchScore(currentUser!, candidates[currentIndex], modeIndex),
+                        matchType: modeNames[modeIndex],
+                        onLike: () async {
+                          final myUid = FirebaseAuth.instance.currentUser?.uid;
+                          if (myUid != null) {
+                            await saveMatchRecord(myUid, candidates[currentIndex].id, modeNames[modeIndex], _getMatchScore(currentUser!, candidates[currentIndex], modeIndex));
+                          }
                           setState(() {
                             if (currentIndex < candidates.length - 1) currentIndex++;
                           });
@@ -234,13 +262,35 @@ class _MatchScreenState extends State<MatchScreen> {
             ),
     );
   }
+
+  int _getMatchScore(UserModel me, UserModel other, int mode) {
+    switch (mode) {
+      case 0:
+        return interestScore(me.habits, other.habits);
+      case 1:
+        final d = geoDistance(me.location, other.location);
+        return (d > 9999) ? 0 : (100 - d.round()).clamp(0, 100); // 距離越近分數越高
+      case 2:
+        return skillScore(me.ask, other.share, me.share, other.ask) * 50;
+      default:
+        return 0;
+    }
+  }
 }
 
 class _UserCard extends StatelessWidget {
   final UserModel user;
+  final int matchScore;
+  final String matchType;
   final VoidCallback onLike;
   final VoidCallback onDislike;
-  const _UserCard({required this.user, required this.onLike, required this.onDislike});
+  const _UserCard({
+    required this.user,
+    required this.matchScore,
+    required this.matchType,
+    required this.onLike,
+    required this.onDislike,
+  });
 
   String getAgeText(String learnerBirth) {
     try {
@@ -256,20 +306,38 @@ class _UserCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 8,
+      elevation: 12,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // 頭像
+            CircleAvatar(
+              radius: 40,
+              backgroundColor: Colors.orange.shade100,
+              child: Text(user.name.isNotEmpty ? user.name[0] : '?',
+                  style: const TextStyle(fontSize: 36, color: Colors.orange)),
+            ),
+            const SizedBox(height: 12),
             Text(user.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             Text(getAgeText(user.learnerBirth)),
             Text('地區：${user.address}'),
+            const Divider(height: 24),
             Text('興趣：${user.habits.join(", ")}'),
             Text('可分享：${user.share.join(", ")}'),
             Text('想學習：${user.ask.join(", ")}'),
+            const SizedBox(height: 12),
+            // 配對分數
+            if (matchScore >= 0)
+              Chip(
+                label: Text('$matchType配對分數：$matchScore',
+                    style: const TextStyle(color: Colors.white)),
+                backgroundColor: Colors.orange,
+              ),
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -291,6 +359,108 @@ class _UserCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class MatchHistoryScreen extends StatefulWidget {
+  const MatchHistoryScreen({super.key});
+  @override
+  State<MatchHistoryScreen> createState() => _MatchHistoryScreenState();
+}
+
+class _MatchHistoryScreenState extends State<MatchHistoryScreen> {
+  List<Map<String, dynamic>> records = [];
+  bool isLoading = true;
+  String? errorMsg;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRecords();
+  }
+
+  Future<void> _loadRecords() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      setState(() {
+        errorMsg = '尚未登入，無法讀取配對紀錄';
+        isLoading = false;
+      });
+      debugPrint('MatchHistory: user not logged in');
+      return;
+    }
+    try {
+      final ref = FirebaseDatabase.instance.ref('matches/${user.uid}');
+      final snapshot = await ref.get();
+      debugPrint('MatchHistory: snapshot.exists=${snapshot.exists}');
+      if (snapshot.exists && snapshot.value != null) {
+        final data = Map<String, dynamic>.from(snapshot.value as Map);
+        setState(() {
+          records = data.entries.map((e) {
+            final v = Map<String, dynamic>.from(e.value);
+            v['uid'] = e.key;
+            return v;
+          }).toList();
+          isLoading = false;
+          errorMsg = null;
+        });
+        debugPrint('MatchHistory: loaded ${records.length} records');
+      } else {
+        setState(() {
+          records = [];
+          isLoading = false;
+          errorMsg = null;
+        });
+        debugPrint('MatchHistory: no records');
+      }
+    } catch (e) {
+      setState(() {
+        errorMsg = '讀取配對紀錄時發生錯誤：$e';
+        isLoading = false;
+      });
+      debugPrint('MatchHistory: error $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('配對紀錄')),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : errorMsg != null
+              ? Center(
+                  child: Text(errorMsg!, style: const TextStyle(color: Colors.red, fontSize: 18)),
+                )
+              : records.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(Icons.info_outline, color: Colors.orange, size: 48),
+                          SizedBox(height: 12),
+                          Text('目前沒有配對紀錄', style: TextStyle(fontSize: 18, color: Colors.orange)),
+                        ],
+                      ),
+                    )
+                  : ListView.separated(
+                      itemCount: records.length,
+                      separatorBuilder: (_, __) => const Divider(),
+                      itemBuilder: (context, i) {
+                        final r = records[i];
+                        return ListTile(
+                          leading: const Icon(Icons.person),
+                          title: Text('用戶ID: ${r['uid']}'),
+                          subtitle: Text('${r['matchType']}分數: ${r['score']}'),
+                          trailing: Text(
+                            DateFormat('yyyy-MM-dd HH:mm').format(
+                              DateTime.fromMillisecondsSinceEpoch(r['timestamp']).toLocal(),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
     );
   }
 }

@@ -177,19 +177,19 @@ Row(
       heroTag: "reject",
       onPressed: _nextUser,
       backgroundColor: Colors.deepOrange,
-      child: const Icon(Icons.close, color: Colors.white),
+      child: const Icon(Icons.close),
     ),
     FloatingActionButton(
       heroTag: "info",
       onPressed: () => _showUserInfoBottomSheet(context),
       backgroundColor: Colors.orange.shade600,
-      child: const Icon(Icons.info, color: Colors.white),
+      child: const Icon(Icons.info),
     ),
     FloatingActionButton(
       heroTag: "accept",
       onPressed: _matchSuccess,
       backgroundColor: Colors.orange,
-      child: const Icon(Icons.favorite, color: Colors.white),
+      child: const Icon(Icons.favorite),
     ),
   ],
 )
@@ -411,3 +411,167 @@ Expanded(
     ),
   ),
 ), 
+
+class _UserCard extends StatelessWidget {
+  final UserModel user;
+  final int matchScore;
+  final String matchType;
+  final VoidCallback onLike;
+  final VoidCallback onDislike;
+  const _UserCard({
+    required this.user,
+    required this.matchScore,
+    required this.matchType,
+    required this.onLike,
+    required this.onDislike,
+  });
+
+  String getAgeText(String learnerBirth) {
+    try {
+      final year = int.tryParse(learnerBirth.substring(0, 4));
+      if (year != null) {
+        final age = DateTime.now().year - year;
+        return '年齡：約$age 歲';
+      }
+    } catch (_) {}
+    return '年齡：未知';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 12,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 頭像
+            CircleAvatar(
+              radius: 40,
+              backgroundColor: Colors.orange.shade100,
+              child: Text(user.name.isNotEmpty ? user.name[0] : '?',
+                  style: const TextStyle(fontSize: 36, color: Colors.orange)),
+            ),
+            const SizedBox(height: 12),
+            Text(user.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text(getAgeText(user.learnerBirth)),
+            Text('地區：${user.address}'),
+            const Divider(height: 24),
+            Text('興趣：${user.habits.join(", ")}'),
+            Text('可分享：${user.share.join(", ")}'),
+            Text('想學習：${user.ask.join(", ")}'),
+            const SizedBox(height: 12),
+            // 配對分數
+            if (matchScore >= 0)
+              Chip(
+                label: Text('$matchType配對分數：$matchScore',
+                    style: const TextStyle(color: Colors.white)),
+                backgroundColor: Colors.orange,
+              ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                FloatingActionButton(
+                  heroTag: null,
+                  onPressed: onDislike,
+                  backgroundColor: Colors.red,
+                  child: const Icon(Icons.close),
+                ),
+                FloatingActionButton(
+                  heroTag: null,
+                  onPressed: onLike,
+                  backgroundColor: Colors.green,
+                  child: const Icon(Icons.favorite),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+} 
+
+class MatchHistoryScreen extends StatefulWidget {
+  const MatchHistoryScreen({super.key});
+  @override
+  State<MatchHistoryScreen> createState() => _MatchHistoryScreenState();
+}
+
+class _MatchHistoryScreenState extends State<MatchHistoryScreen> {
+  List<Map<String, dynamic>> records = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRecords();
+  }
+
+  Future<void> _loadRecords() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    final ref = FirebaseDatabase.instance.ref('matches/${user.uid}');
+    final snapshot = await ref.get();
+    if (snapshot.exists && snapshot.value != null) {
+      final data = Map<String, dynamic>.from(snapshot.value as Map);
+      setState(() {
+        records = data.entries.map((e) {
+          final v = Map<String, dynamic>.from(e.value);
+          v['uid'] = e.key;
+          return v;
+        }).toList();
+        isLoading = false;
+      });
+    } else {
+      setState(() {
+        records = [];
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('配對紀錄')),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.separated(
+              itemCount: records.length,
+              separatorBuilder: (_, __) => const Divider(),
+              itemBuilder: (context, i) {
+                final r = records[i];
+                return ListTile(
+                  leading: const Icon(Icons.person),
+                  title: Text('用戶ID: ${r['uid']}'),
+                  subtitle: Text('${r['matchType']}分數: ${r['score']}'),
+                  trailing: Text(
+                    DateTime.fromMillisecondsSinceEpoch(r['timestamp'])
+                        .toLocal()
+                        .toString()
+                        .substring(0, 16),
+                  ),
+                );
+              },
+            ),
+    );
+  }
+} 
+
+actions: [
+  IconButton(
+    icon: const Icon(Icons.history),
+    onPressed: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const MatchHistoryScreen()),
+      );
+    },
+  ),
+], 
