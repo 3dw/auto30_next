@@ -46,26 +46,35 @@ class UserModel {
   final String name;
   final String learnerBirth;
   final String learnerHabit;
+  final String learnerRole;
+  final String learnerType;
+  final String address;
   final LatLng location;
 
-  UserModel({required this.id, 
-  required this.name, 
-  required this.learnerBirth, 
-  required this.learnerHabit, 
-  required this.location});
+  UserModel({
+    required this.id, 
+    required this.name, 
+    required this.learnerBirth, 
+    required this.learnerHabit,
+    required this.learnerRole,
+    required this.learnerType,
+    required this.address,
+    required this.location
+  });
 
   factory UserModel.fromFirebase(String id, Map<String, dynamic> data) {
     print('data: $data');
-
     // Parse latlngColumn string format: "24.819444,120.960278"
     final latlngString = data['latlngColumn'] as String;
     final coordinates = latlngString.split(',');
-    
     return UserModel(
       id: id,
       name: data['name'] ?? 'Unknown User',
       learnerBirth: data['learner_birth'] ?? '1980',
       learnerHabit: data['learner_habit'] ?? '未知',
+      learnerRole: data['learner_role'] ?? '未知',
+      learnerType: data['learner_type'] ?? '未知',
+      address: data['address'] ?? '未知地區',
       location: LatLng(
         _parseCoordinate(coordinates[0].trim()),
         _parseCoordinate(coordinates[1].trim()),
@@ -309,9 +318,9 @@ class _MapScreenState extends State<MapScreen> {
 
           // 用learner_birth(西元年) 來計算年齡
           Text('年齡:約 $age 歲'),
-
+          Text('身份: ${user.learnerRole}'),
+          Text('地區: ${user.address}'),
           Text('興趣: ${user.learnerHabit}'),
-
 
           const SizedBox(height: 16),
           ElevatedButton(

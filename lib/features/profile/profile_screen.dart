@@ -37,6 +37,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _noteController = TextEditingController();
   final _priceController = TextEditingController();
   
+  // 新增欄位控制器
+  final _availableTimeController = TextEditingController(); // 比較有空的時段
+  final _oldestChildBirthController = TextEditingController(); // 最大孩子的出生年次
+  final _youngestChildBirthController = TextEditingController(); // 最小孩子的出生年次
+  
   // Controllers for custom, user-entered text
   final _customHabitsController = TextEditingController();
   final _customSharesController = TextEditingController();
@@ -47,6 +52,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   List<String> _selectedHabits = []; // learner_habit
   List<String> _selectedShares = []; // share
   List<String> _selectedAsks = [];   // ask
+
+  // 新增選擇欄位
+  String _selectedRole = '自學生'; // learner_role
+  String _selectedLearningType = '類學校機構'; // learner_type
 
   // TODO: Implement map selection for latlng
   Map<String, double>? _latlng;
@@ -65,6 +74,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   
   final List<String> _availableAsks = [
     '尋求程式指導', '找人練習英文', '想學樂器', '一起運動', '專案合作', '討論學術主題'
+  ];
+
+  // 新增選項列表
+  final List<String> _availableRoles = [
+    '自學生', '家長', '教育工作者', '其他'
+  ];
+
+  final List<String> _availableLearningTypes = [
+    '類學校機構', '完全自主學習', '混合式學習', '其他'
   ];
 
   @override
@@ -100,6 +118,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _noteController.text = data['note'] ?? '';
         _priceController.text = data['price'] ?? '';
 
+        // 載入新欄位
+        _availableTimeController.text = data['available_time'] ?? '';
+        _oldestChildBirthController.text = data['oldest_child_birth'] ?? '';
+        _youngestChildBirthController.text = data['youngest_child_birth'] ?? '';
+        _selectedRole = data['learner_role'] ?? '自學生';
+        _selectedLearningType = data['learner_type'] ?? '類學校機構';
+
         if (data['learner_birth'] != null && data['learner_birth'].toString().isNotEmpty) {
           try {
             _selectedBirthDate = DateTime.parse(data['learner_birth']);
@@ -117,11 +142,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _customSharesController.text = _selectedShares.where((s) => !_availableShares.contains(s)).join(', ');
         _customAsksController.text = _selectedAsks.where((a) => !_availableAsks.contains(a)).join(', ');
         
-        if (data['latlngColumn'] != null && data['latlngColumn']['lat'] != null && data['latlngColumn']['lng'] != null) {
-          _latlng = {
-            'lat': _parseCoordinate(data['latlngColumn']['lat']),
-            'lng': _parseCoordinate(data['latlngColumn']['lng']),
-          };
+        if (data['latlngColumn'] != null && data['latlngColumn'] is String) {
+          final parts = data['latlngColumn'].split(',');
+          if (parts.length == 2) {
+            _latlng = {
+              'lat': double.tryParse(parts[0]) ?? 0.0,
+              'lng': double.tryParse(parts[1]) ?? 0.0,
+            };
+          }
         }
         
         if (mounted) {
@@ -174,6 +202,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return {...fromChips, ...fromText}.toList().join(', ');
       }
 
+      final latStr = _latlng != null ? '${_latlng!['lat']},${_latlng!['lng']}' : null;
       final data = {
         'name': _nameController.text,
         'address': _addressController.text,
@@ -186,11 +215,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'learner_habit': getFinalString(_selectedHabits, _availableHabits, _customHabitsController),
         'share': getFinalString(_selectedShares, _availableShares, _customSharesController),
         'ask': getFinalString(_selectedAsks, _availableAsks, _customAsksController),
-        'latlngColumn': _latlng != null ? { 'lat': _latlng!['lat'], 'lng': _latlng!['lng'] } : null,
+        'latlngColumn': latStr,
         'lastUpdate': ServerValue.timestamp,
         'email': user.email,
         'uid': user.uid,
         'photoURL': user.photoURL,
+        'learner_role': _selectedRole,
+        'learner_type': _selectedLearningType,
+        'available_time': _availableTimeController.text,
+        'oldest_child_birth': _oldestChildBirthController.text,
+        'youngest_child_birth': _youngestChildBirthController.text,
       };
 
       await _database.child('users/${user.uid}').set(data);
@@ -322,6 +356,73 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       controller: _site2Controller,
                       decoration: const InputDecoration(labelText: '個人網站/社群 2'),
                     ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _availableTimeController,
+                      decoration: const InputDecoration(
+                        labelText: '比較有空的時段',
+                        hintText: '例如：週五下午和週末',
+                      ),
+                    ),
+
+                    _buildSectionTitle('社交資訊'),
+                    DropdownButtonFormField<String>(
+                      value: _selectedRole,
+                      decoration: const InputDecoration(
+                        labelText: '您的身份 *',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: _availableRoles.map((String role) {
+                        return DropdownMenuItem<String>(
+                          value: role,
+                          child: Text(role),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedRole = newValue!;
+                        });
+                      },
+                      validator: (value) => value == null ? '請選擇身份' : null,
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      value: _selectedLearningType,
+                      decoration: const InputDecoration(
+                        labelText: '主要的自學型態 *',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: _availableLearningTypes.map((String type) {
+                        return DropdownMenuItem<String>(
+                          value: type,
+                          child: Text(type),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedLearningType = newValue!;
+                        });
+                      },
+                      validator: (value) => value == null ? '請選擇自學型態' : null,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _oldestChildBirthController,
+                      decoration: const InputDecoration(
+                        labelText: '最大孩子的出生年次(西元)',
+                        hintText: '若還沒有孩子或還不需找共學夥伴可略過',
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _youngestChildBirthController,
+                      decoration: const InputDecoration(
+                        labelText: '最小孩子的出生年次(西元)',
+                        hintText: '若您有多位孩子，請再填寫',
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
 
                     _buildSectionTitle('關於我'),
                     TextFormField(
@@ -441,6 +542,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _customHabitsController.dispose();
     _customSharesController.dispose();
     _customAsksController.dispose();
+    _availableTimeController.dispose();
+    _oldestChildBirthController.dispose();
+    _youngestChildBirthController.dispose();
     super.dispose();
   }
 }

@@ -124,11 +124,15 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
     final learnerBirth = userData!['learner_birth'] ?? 1980;
     final learnerHabit = userData!['learner_habit'] ?? '未知';
     final learnerRole = userData!['learner_role'] ?? '未知';
+    final learnerType = userData!['learner_type'] ?? '未知';
     final address = userData!['address'] ?? '未知地區';
     final connectMe = userData!['connect_me'] ?? '';
     final share = userData!['share'] ?? '';
     final note = userData!['note'] ?? '';
     final photoURL = userData!['photoURL'];
+    final availableTime = userData!['available_time'] ?? '';
+    final oldestChildBirth = userData!['oldest_child_birth'] ?? '';
+    final youngestChildBirth = userData!['youngest_child_birth'] ?? '';
 
     // 計算年齡
     final currentYear = DateTime.now().year;
@@ -136,9 +140,9 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
 
     // 解析座標
     LatLng? location;
-    if (userData!['latlngColumn'] != null) {
+    if (userData!['latlngColumn'] != null && userData!['latlngColumn'] is String) {
       try {
-        final coordinates = userData!['latlngColumn'].toString().split(',');
+        final coordinates = userData!['latlngColumn'].split(',');
         if (coordinates.length == 2) {
           location = LatLng(
             double.parse(coordinates[0].trim()),
@@ -188,9 +192,27 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
           // 詳細資訊卡片
           _buildInfoCard('基本資訊', [
             _buildInfoRow(Icons.work, '身份', learnerRole),
+            _buildInfoRow(Icons.school, '自學型態', learnerType),
             _buildInfoRow(Icons.location_on, '地區', address),
             _buildInfoRow(Icons.interests, '興趣', learnerHabit),
           ]),
+
+          const SizedBox(height: 16),
+
+          if (availableTime.isNotEmpty)
+            _buildInfoCard('時間安排', [
+              _buildInfoRow(Icons.schedule, '有空時段', availableTime),
+            ]),
+
+          const SizedBox(height: 16),
+
+          if (oldestChildBirth.isNotEmpty || youngestChildBirth.isNotEmpty)
+            _buildInfoCard('孩子資訊', [
+              if (oldestChildBirth.isNotEmpty)
+                _buildInfoRow(Icons.child_care, '最大孩子出生年', oldestChildBirth),
+              if (youngestChildBirth.isNotEmpty)
+                _buildInfoRow(Icons.child_care, '最小孩子出生年', youngestChildBirth),
+            ]),
 
           const SizedBox(height: 16),
 
