@@ -5,6 +5,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/foundation.dart';
+import 'package:auto30_next/features/profile/user_detail_screen.dart';
 
 class UserModel {
   final String id;
@@ -371,6 +372,7 @@ class MatchHistoryScreen extends StatefulWidget {
 
 class _MatchHistoryScreenState extends State<MatchHistoryScreen> {
   List<Map<String, dynamic>> records = [];
+  Map<String, dynamic> userMap = {}; // uid -> user簡單資料
   bool isLoading = true;
   String? errorMsg;
 
@@ -396,12 +398,31 @@ class _MatchHistoryScreenState extends State<MatchHistoryScreen> {
       debugPrint('MatchHistory: snapshot.exists=${snapshot.exists}');
       if (snapshot.exists && snapshot.value != null) {
         final data = Map<String, dynamic>.from(snapshot.value as Map);
+        final uids = data.keys.toList();
+        // 讀取所有配對對象的簡單資料
+        final usersRef = FirebaseDatabase.instance.ref('users');
+        final usersSnap = await usersRef.get();
+        Map<String, dynamic> userMapTmp = {};
+        if (usersSnap.exists && usersSnap.value != null) {
+          final allUsers = Map<String, dynamic>.from(usersSnap.value as Map);
+          for (final uid in uids) {
+            if (allUsers[uid] != null) {
+              final u = Map<String, dynamic>.from(allUsers[uid]);
+              userMapTmp[uid] = {
+                'name': u['name'] ?? '',
+                'address': u['address'] ?? '',
+                'photoURL': u['photoURL'] ?? '',
+              };
+            }
+          }
+        }
         setState(() {
           records = data.entries.map((e) {
             final v = Map<String, dynamic>.from(e.value);
             v['uid'] = e.key;
             return v;
           }).toList();
+          userMap = userMapTmp;
           isLoading = false;
           errorMsg = null;
         });
@@ -421,6 +442,18 @@ class _MatchHistoryScreenState extends State<MatchHistoryScreen> {
       });
       debugPrint('MatchHistory: error $e');
     }
+  }
+
+  Future<void> _deleteRecord(String uid) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    final ref = FirebaseDatabase.instance.ref('matches/${user.uid}/$uid');
+    await ref.remove();
+    setState(() {
+      records.removeWhere((r) => r['uid'] == uid);
+      userMap.remove(uid);
+    });
+    debugPrint('MatchHistory: deleted record $uid');
   }
 
   @override
@@ -449,15 +482,54 @@ class _MatchHistoryScreenState extends State<MatchHistoryScreen> {
                       separatorBuilder: (_, __) => const Divider(),
                       itemBuilder: (context, i) {
                         final r = records[i];
+                        final uid = r['uid'];
+                        final u = userMap[uid] ?? {};
                         return ListTile(
-                          leading: const Icon(Icons.person),
-                          title: Text('用戶ID: ${r['uid']}'),
-                          subtitle: Text('${r['matchType']}分數: ${r['score']}'),
-                          trailing: Text(
-                            DateFormat('yyyy-MM-dd HH:mm').format(
-                              DateTime.fromMillisecondsSinceEpoch(r['timestamp']).toLocal(),
-                            ),
+                          leading: u['photoURL'] != null && u['photoURL'].toString().isNotEmpty
+                              ? CircleAvatar(backgroundImage: NetworkImage(u['photoURL']))
+                              : const CircleAvatar(child: Icon(Icons.person)),
+                          title: Text(u['name']?.isNotEmpty == true ? u['name'] : '用戶ID: $uid'),
+                          subtitle: Text(
+                            '${r['matchType']}分數: ${r['score']}\n${u['address'] ?? ''}',
                           ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                DateFormat('yyyy-MM-dd HH:mm').format(
+                                  DateTime.fromMillisecondsSinceEpoch(r['timestamp']).toLocal(),
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete, color: Colors.red),
+                                tooltip: '刪除紀錄',
+                                onPressed: () async {
+                                  final confirm = await showDialog<bool>(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      title: const Text('刪除配對紀錄'),
+                                      content: const Text('確定要刪除此配對紀錄嗎？'),
+                                      actions: [
+                                        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
+                                        TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('刪除')),
+                                      ],
+                                    ),
+                                  );
+                                  if (confirm == true) {
+                                    await _deleteRecord(uid);
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => UserDetailScreen(uid: uid),
+                              ),
+                            );
+                          },
                         );
                       },
                     ),
