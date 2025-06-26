@@ -161,4 +161,118 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 總結來說，你的專案架構非常健全，完全支援未來向 iOS 和 Android 平台擴展。目前的 web 部署只是第一步，但專案的基礎設施和依賴配置已經為跨平台開發做好了準備。當你準備好擴展到移動平台時，主要的工作將集中在平台特定的配置和 CI/CD 流程的建立上。
 
+## 功能連接關係說明
+
+### 📍 **首頁「附近的人」功能**
+
+#### 🔗 **連接路徑：**
+1. **首頁按鈕** → `lib/features/home/presentation/screens/home_screen.dart`
+2. **路由導航** → `lib/core/config/app_router.dart`
+3. **目標頁面** → `lib/features/map/map_screen.dart`
+
+#### 📋 **詳細流程：**
+
+**1. 首頁按鈕定義** (`home_screen.dart` 第 138-221 行)：
+```dart
+class _QuickFeatureCard extends StatelessWidget {
+  // ...
+  void _onTap() {
+    switch (title) {
+      case '附近的人':
+        context.push('/map');  // 導航到地圖頁面
+        break;
+      // ...
+    }
+  }
+}
+```
+
+**2. 路由設定** (`app_router.dart` 第 50-55 行)：
+```dart
+GoRoute(
+  path: '/map',
+  name: 'map',
+  builder: (context, state) => const MapScreen(),
+),
+```
+
+**3. 地圖頁面** (`map_screen.dart`)：
+- 顯示所有用戶的位置標記
+- 從 Firebase 載入用戶資料
+- 支援點擊用戶標記查看詳細資訊
+
+---
+
+### 🗺️ **個人資料「在地圖上設定位置」功能**
+
+#### 🔗 **連接路徑：**
+1. **個人資料頁面** → `lib/features/profile/profile_screen.dart`
+2. **位置選擇器** → `lib/features/profile/location_picker_screen.dart`
+3. **返回個人資料** → 更新位置座標
+
+#### 📋 **詳細流程：**
+
+**1. 個人資料頁面按鈕** (`profile_screen.dart` 第 280-295 行)：
+```dart
+ElevatedButton(
+  onPressed: () async {
+    final result = await Navigator.push<LatLng?>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LocationPickerScreen(
+          initialLocation: _latlng != null
+              ? LatLng(_latlng!['lat']!, _latlng!['lng']!)
+              : null
+        ),
+      ),
+    );
+    
+    if (result != null) {
+      setState(() {
+        _latlng = {
+          'lat': result.latitude,
+          'lng': result.longitude,
+        };
+      });
+    }
+  },
+  child: const Text('在地圖上設定位置'),
+)
+```
+
+**2. 位置選擇器頁面** (`location_picker_screen.dart`)：
+- 提供互動式地圖讓用戶選擇位置
+- 顯示當前選擇的座標
+- 支援拖曳地圖來調整位置
+
+**3. 資料儲存** (`profile_screen.dart` 第 175-185 行)：
+```dart
+'latlngColumn': _latlng != null ? { 
+  'lat': _latlng!['lat'], 
+  'lng': _latlng!['lng'] 
+} : null,
+```
+
+---
+
+### 📊 **功能對照表**
+
+| 功能 | 起始檔案 | 目標檔案 | 路由路徑 |
+|------|----------|----------|----------|
+| **附近的人** | `home_screen.dart` | `map_screen.dart` | `/map` |
+| **在地圖上設定位置** | `profile_screen.dart` | `location_picker_screen.dart` | 直接導航 |
+
+### 💡 **功能說明**
+
+這兩個功能都與地圖相關，但用途不同：
+- **附近的人**：查看其他用戶的位置，支援點擊查看用戶詳細資料
+- **在地圖上設定位置**：設定自己的位置，用於個人資料中的地理位置資訊
+
+### 🔧 **技術實現**
+
+- 使用 `flutter_map` 套件實現地圖功能
+- 整合 `flutter_map_cancellable_tile_provider` 優化網頁版性能
+- 使用 `geolocator` 套件處理位置權限和獲取當前位置
+- 透過 Firebase Realtime Database 儲存和讀取用戶位置資料
+
 
