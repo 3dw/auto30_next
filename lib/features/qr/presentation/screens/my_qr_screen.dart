@@ -34,7 +34,7 @@ class _MyQrScreenState extends State<MyQrScreen> with TickerProviderStateMixin {
     final isDesktop = screenSize.width > 600;
     final user = FirebaseAuth.instance.currentUser;
     final uid = user?.uid ?? '';
-    final qrData = 'auto30://user/$uid';
+    final qrData = 'https://auto30next.alearn.org.tw/user/$uid';
     
     return Scaffold(
       appBar: AppBar(

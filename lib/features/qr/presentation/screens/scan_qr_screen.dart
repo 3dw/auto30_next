@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:go_router/go_router.dart';
 
 class ScanQrScreen extends StatefulWidget {
   const ScanQrScreen({super.key});
@@ -29,7 +30,11 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
         if (code.startsWith('auto30://user/')) {
           final uid = code.replaceFirst('auto30://user/', '');
           Navigator.pop(context);
-          Navigator.pushNamed(context, '/user/$uid');
+          Future.delayed(const Duration(milliseconds: 200), () {
+            if (mounted) {
+              context.go('/user/$uid');
+            }
+          });
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('無效的 QR Code')),
