@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class MyQrScreen extends StatefulWidget {
   const MyQrScreen({super.key});
@@ -30,6 +32,9 @@ class _MyQrScreenState extends State<MyQrScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     final isDesktop = screenSize.width > 600;
+    final user = FirebaseAuth.instance.currentUser;
+    final uid = user?.uid ?? '';
+    final qrData = 'auto30://user/$uid';
     
     return Scaffold(
       appBar: AppBar(
@@ -68,7 +73,7 @@ class _MyQrScreenState extends State<MyQrScreen> with TickerProviderStateMixin {
       body: TabBarView(
         controller: _tabController,
         children: [
-          MyQRCodeTab(isDesktop: isDesktop),
+          MyQRCodeTab(isDesktop: isDesktop, qrData: qrData),
           ScanQRCodeTab(isDesktop: isDesktop),
         ],
       ),
@@ -78,8 +83,9 @@ class _MyQrScreenState extends State<MyQrScreen> with TickerProviderStateMixin {
 
 class MyQRCodeTab extends StatefulWidget {
   final bool isDesktop;
+  final String qrData;
   
-  const MyQRCodeTab({super.key, required this.isDesktop});
+  const MyQRCodeTab({super.key, required this.isDesktop, required this.qrData});
 
   @override
   State<MyQRCodeTab> createState() => _MyQRCodeTabState();
@@ -135,12 +141,10 @@ class _MyQRCodeTabState extends State<MyQRCodeTab> {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.orange.shade300),
                   ),
-                  child: CustomPaint(
-                    painter: QRCodePainter(),
-                    size: Size(
-                      widget.isDesktop ? 250 : 200, 
-                      widget.isDesktop ? 250 : 200
-                    ),
+                  child: QrImageView(
+                    data: widget.qrData,
+                    version: QrVersions.auto,
+                    size: widget.isDesktop ? 250 : 200,
                   ),
                 ),
                 

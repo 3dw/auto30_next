@@ -275,4 +275,41 @@ ElevatedButton(
 - 使用 `geolocator` 套件處理位置權限和獲取當前位置
 - 透過 Firebase Realtime Database 儲存和讀取用戶位置資料
 
+# auto30_next 專案說明
+
+## 主要功能與檔案結構
+
+### 1. 地圖與配對功能
+- 地圖頁面：`lib/features/map/map_screen.dart`
+- 「附近的人」：地圖頁面會顯示附近用戶，需取得位置權限。
+- 個人資料 >> 在地圖上設定位置：`lib/features/profile/location_picker_screen.dart`
+- 路由設定：`lib/core/config/app_router.dart`
+- 權限設定與地圖 tile provider 已優化，效能提升。
+
+### 2. 配對系統
+- 配對主頁：`lib/features/match/match_screen.dart`
+- 配對紀錄頁：`lib/features/match/match_history_screen.dart`
+- 配對邏輯、排序、UI 皆參考 Tinder 卡片式滑動，支援興趣、位置、技能、隨機配對。
+- Like/配對紀錄寫入 Firebase，紀錄可查詢與刪除。
+
+### 3. 個人資料欄位
+- 個人資料頁：`lib/features/profile/profile_screen.dart`
+- 詳細資料頁：`lib/features/profile/user_detail_screen.dart`
+- 補齊欄位：身份、自學型態、孩子出生年（只需年份）、可用時段等。
+- 地理座標 latlngColumn 儲存格式為字串 "lat,lng"。
+
+### 4. QR Code 功能
+- 我的ＱＲ碼：`lib/features/qr/presentation/screens/my_qr_screen.dart`
+- 掃描ＱＲ碼：`lib/features/qr/presentation/screens/scan_qr_screen.dart`
+- 入口與路由：`lib/core/config/app_router.dart`
+- 掃描後自動跳轉至個人資料頁。
+
+### 5. Firebase 權限與資料結構
+- 請參考 `README_DEPLOY.md` 及下方 MATCHING_SYSTEM_ANALYSIS.md。
+- matches 路徑需開放正確讀寫權限。
+
+### 6. 其他
+- Dart 語法錯誤、import 問題、UI 顯示問題皆已多次修正。
+- 所有功能均以中文說明，並根據需求直接修改程式碼。
+
 
