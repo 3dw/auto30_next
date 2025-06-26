@@ -47,7 +47,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _customSharesController = TextEditingController();
   final _customAsksController = TextEditingController();
 
-  DateTime? _selectedBirthDate;
+  String? _selectedBirthYear;
   
   List<String> _selectedHabits = []; // learner_habit
   List<String> _selectedShares = []; // share
@@ -126,11 +126,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _selectedLearningType = data['learner_type'] ?? '類學校機構';
 
         if (data['learner_birth'] != null && data['learner_birth'].toString().isNotEmpty) {
-          try {
-            _selectedBirthDate = DateTime.parse(data['learner_birth']);
-          } catch(e) {
-            print("Could not parse learner_birth: ${data['learner_birth']}");
-          }
+          _selectedBirthYear = data['learner_birth'].toString();
         }
         
         _selectedHabits = _parseList(data['learner_habit']);
@@ -211,7 +207,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'site2': _site2Controller.text,
         'note': _noteController.text,
         'price': _priceController.text,
-        'learner_birth': _selectedBirthDate != null ? DateFormat('yyyy-MM-dd').format(_selectedBirthDate!) : null,
+        'learner_birth': _selectedBirthYear,
         'learner_habit': getFinalString(_selectedHabits, _availableHabits, _customHabitsController),
         'share': getFinalString(_selectedShares, _availableShares, _customSharesController),
         'ask': getFinalString(_selectedAsks, _availableAsks, _customAsksController),
@@ -248,20 +244,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _selectBirthDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedBirthDate ?? DateTime.now(),
-      firstDate: DateTime(1920),
-      lastDate: DateTime.now(),
-    );
-    if (picked != null && picked != _selectedBirthDate) {
-      setState(() {
-        _selectedBirthDate = picked;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -295,15 +277,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
-                      readOnly: true,
-                      onTap: () => _selectBirthDate(context),
-                      decoration: InputDecoration(
-                        labelText: '出生年月日',
-                        hintText: _selectedBirthDate == null 
-                            ? '請選擇日期' 
-                            : DateFormat('yyyy-MM-dd').format(_selectedBirthDate!),
+                      initialValue: _selectedBirthYear,
+                      decoration: const InputDecoration(
+                        labelText: '出生年（西元）',
+                        hintText: '例如：2005',
                       ),
-                       validator: (value) => _selectedBirthDate == null ? '請選擇出生年月日' : null,
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return '請輸入出生年';
+                        final year = int.tryParse(value);
+                        if (year == null || year < 1900 || year > DateTime.now().year) return '請輸入正確的西元年';
+                        return null;
+                      },
+                      onChanged: (value) => _selectedBirthYear = value,
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
