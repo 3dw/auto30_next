@@ -482,12 +482,11 @@ class _UserMenuButton extends StatelessWidget {
         switch (value) {
           case 'profile':
             // 跳轉到個人資料頁
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ProfileScreen(),
-              ),
-            );
+            context.push('/profile');
+            break;
+          case 'settings':
+            // 跳轉到設定頁面
+            context.push('/settings');
             break;
           case 'logout':
             // 顯示登出確認對話框
@@ -503,6 +502,16 @@ class _UserMenuButton extends StatelessWidget {
               Icon(Icons.person, color: Colors.orange),
               SizedBox(width: 8),
               Text('個人資料'),
+            ],
+          ),
+        ),
+        const PopupMenuItem<String>(
+          value: 'settings',
+          child: Row(
+            children: [
+              Icon(Icons.settings, color: Colors.orange),
+              SizedBox(width: 8),
+              Text('設定'),
             ],
           ),
         ),

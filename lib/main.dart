@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:auto30_next/core/config/app_config.dart';
 import 'package:auto30_next/core/theme/app_theme.dart';
 import 'package:auto30_next/features/auth/presentation/providers/auth_provider.dart';
+import 'package:auto30_next/core/providers/theme_provider.dart';
 import 'package:auto30_next/core/config/firebase_options.dart';
 import 'package:auto30_next/core/config/app_router.dart';
 
@@ -47,17 +48,18 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         // Add other providers here
       ],
-      child: Consumer<AuthProvider>(
-        builder: (context, authProvider, _) {
+      child: Consumer2<AuthProvider, ThemeProvider>(
+        builder: (context, authProvider, themeProvider, _) {
           final router = AppRouter.createRouter(authProvider);
           
           return MaterialApp.router(
             title: AppConfig.appName,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
-            themeMode: ThemeMode.system,
+            themeMode: themeProvider.themeMode,
             routerConfig: router,
           );
         },

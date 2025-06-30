@@ -11,6 +11,7 @@ import 'package:auto30_next/features/qr/presentation/screens/my_qr_screen.dart';
 import 'package:auto30_next/features/social/presentation/screens/social_main_screen.dart';
 import 'package:auto30_next/features/learning_center/presentation/screens/learning_center_screen.dart';
 import 'package:auto30_next/features/profile/user_detail_screen.dart';
+import 'package:auto30_next/features/settings/presentation/screens/settings_screen.dart';
 
 class AppRouter {
   static GoRouter createRouter(AuthProvider authProvider) {
@@ -99,6 +100,13 @@ class AppRouter {
           path: '/profile',
           name: 'profile',
           builder: (context, state) => const ProfileScreen(),
+        ),
+
+        // 設定頁面
+        GoRoute(
+          path: '/settings',
+          name: 'settings',
+          builder: (context, state) => const SettingsScreen(),
         ),
 
         // 地圖頁面 - 動態路由
