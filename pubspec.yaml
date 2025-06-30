@@ -67,10 +67,9 @@ dependencies:
   http: ^1.1.2
   qr_flutter: ^4.1.0
   firebase_database: ^11.3.7
-  flutter_map: ^8.1.1
-  flutter_map_cancellable_tile_provider: ^3.1.0
+  flutter_map: ^6.1.0
   latlong2: ^0.9.1
-  geolocator: ^14.0.1
+  geolocator: ^10.1.0
 
 dev_dependencies:
   flutter_test:
