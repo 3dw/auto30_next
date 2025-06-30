@@ -181,7 +181,12 @@ class _MapScreenState extends State<MapScreen> {
           if (userData['latlngColumn'] != null &&
               userData['latlngColumn'] is String &&
               userData['latlngColumn'].toString().contains(',')) {
-            users.add(UserModel.fromFirebase(key, userData));
+            
+            // 過濾掉互助旗已降下的用戶
+            final flagDown = userData['flag_down'] as bool? ?? false;
+            if (!flagDown) {
+              users.add(UserModel.fromFirebase(key, userData));
+            }
           }
         }
       });

@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:provider/provider.dart';
+import 'package:auto30_next/core/providers/flag_status_provider.dart';
 import 'location_picker_screen.dart';
 
 // Helper function to safely parse coordinate values.
@@ -269,6 +271,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // 互助旗狀態區塊
+                    Consumer<FlagStatusProvider>(
+                      builder: (context, flagStatusProvider, child) {
+                        return _buildFlagStatusSection(flagStatusProvider);
+                      },
+                    ),
+                    
                     _buildSectionTitle('基本資訊'),
                     TextFormField(
                       controller: _nameController,
@@ -477,6 +486,125 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
             ),
+    );
+  }
+
+  Widget _buildFlagStatusSection(FlagStatusProvider flagStatusProvider) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  flagStatusProvider.statusIcon,
+                  color: flagStatusProvider.statusColor,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        '任務完成 降下互助旗',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        flagStatusProvider.statusText,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (flagStatusProvider.isLoading)
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                else
+                  Switch(
+                    value: flagStatusProvider.isFlagDown,
+                    activeColor: Colors.orange,
+                    onChanged: (value) async {
+                      try {
+                        await flagStatusProvider.setFlagStatus(value);
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                value ? '互助旗已降下 - 你將不會出現在地圖和配對中' : '互助旗已升起 - 重新開始尋求協助',
+                              ),
+                              backgroundColor: value ? Colors.grey : Colors.orange,
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('更新狀態失敗：$e'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
+                    },
+                  ),
+              ],
+            ),
+            
+            const SizedBox(height: 12),
+            
+            // 簡潔的說明文字
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: flagStatusProvider.isFlagDown 
+                    ? Colors.grey.withOpacity(0.1) 
+                    : Colors.orange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: flagStatusProvider.isFlagDown 
+                      ? Colors.grey.withOpacity(0.3) 
+                      : Colors.orange.withOpacity(0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: flagStatusProvider.statusColor,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      flagStatusProvider.isFlagDown
+                          ? '互助旗已降下 - 暫時隱藏，不會出現在地圖和配對中'
+                          : '互助旗升起中 - 其他人可以看到你並與你配對',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

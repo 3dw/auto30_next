@@ -4,11 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:auto30_next/features/auth/presentation/providers/auth_provider.dart';
 import 'package:auto30_next/features/learning_center/presentation/screens/learning_center_screen.dart';
 import 'package:auto30_next/features/quick_practice/presentation/screens/quick_practice_screen.dart';
-import 'package:auto30_next/features/qr/presentation/screens/my_qr_screen.dart';
 import 'package:auto30_next/features/social/presentation/screens/social_main_screen.dart';
-import 'package:auto30_next/features/map/map_screen.dart';
-import 'package:auto30_next/features/profile/profile_screen.dart';
-import 'package:auto30_next/features/match/match_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});

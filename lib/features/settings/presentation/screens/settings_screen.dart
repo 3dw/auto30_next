@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:auto30_next/core/providers/theme_provider.dart';
+import 'package:auto30_next/core/providers/flag_status_provider.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -22,14 +23,20 @@ class SettingsScreen extends StatelessWidget {
           },
         ),
       ),
-      body: Consumer<ThemeProvider>(
-        builder: (context, themeProvider, child) {
+      body: Consumer2<ThemeProvider, FlagStatusProvider>(
+        builder: (context, themeProvider, flagStatusProvider, child) {
           return ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
               // 主題設定區塊
               _buildSectionHeader('外觀設定'),
               _buildThemeCard(context, themeProvider),
+              
+              const SizedBox(height: 24),
+              
+              // 互助旗狀態設定區塊
+              _buildSectionHeader('互助旗狀態'),
+              _buildFlagStatusCard(context, flagStatusProvider),
               
               const SizedBox(height: 24),
               
@@ -90,6 +97,134 @@ class SettingsScreen extends StatelessWidget {
           fontSize: 18,
           fontWeight: FontWeight.bold,
           color: Colors.orange,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFlagStatusCard(BuildContext context, FlagStatusProvider flagStatusProvider) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  flagStatusProvider.statusIcon, 
+                  color: flagStatusProvider.statusColor
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        '任務完成 降下互助旗',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        flagStatusProvider.statusText,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (flagStatusProvider.isLoading)
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                else
+                  Switch(
+                    value: flagStatusProvider.isFlagDown,
+                    activeColor: Colors.orange,
+                    onChanged: (value) async {
+                      try {
+                        await flagStatusProvider.setFlagStatus(value);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                value ? '互助旗已降下 - 你將不會出現在地圖和配對中' : '互助旗已升起 - 重新開始尋求協助',
+                              ),
+                              backgroundColor: value ? Colors.grey : Colors.orange,
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('更新狀態失敗：$e'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
+                    },
+                  ),
+              ],
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // 說明文字
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: flagStatusProvider.isFlagDown 
+                    ? Colors.grey.withOpacity(0.1) 
+                    : Colors.orange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: flagStatusProvider.isFlagDown 
+                      ? Colors.grey.withOpacity(0.3) 
+                      : Colors.orange.withOpacity(0.3),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        size: 16,
+                        color: flagStatusProvider.statusColor,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        flagStatusProvider.isFlagDown ? '互助旗已降下' : '互助旗升起中',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: flagStatusProvider.statusColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    flagStatusProvider.isFlagDown
+                        ? '• 你不會出現在「附近的人」地圖中\n• 其他人無法與你配對\n• 你也無法主動配對其他人\n• 適合任務完成或暫時不需要協助時使用'
+                        : '• 你會出現在「附近的人」地圖中\n• 其他人可以與你配對\n• 你可以主動配對其他人\n• 適合正在尋求學習協助時使用',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -5,6 +5,8 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/foundation.dart';
+import 'package:provider/provider.dart';
+import 'package:auto30_next/core/providers/flag_status_provider.dart';
 import 'package:auto30_next/features/profile/user_detail_screen.dart';
 
 class UserModel {
@@ -138,13 +140,32 @@ class _MatchScreenState extends State<MatchScreen> {
     setState(() => isLoading = true);
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
+    
+    // 檢查自己的互助旗狀態
+    final flagStatusProvider = context.read<FlagStatusProvider>();
+    if (flagStatusProvider.isFlagDown) {
+      setState(() {
+        allUsers = [];
+        currentUser = null;
+        candidates = [];
+        isLoading = false;
+      });
+      return;
+    }
+    
     final ref = FirebaseDatabase.instance.ref('users');
     final snapshot = await ref.get();
     if (snapshot.exists && snapshot.value != null) {
       final data = Map<String, dynamic>.from(snapshot.value as Map);
       final users = <UserModel>[];
       for (final entry in data.entries) {
-        users.add(UserModel.fromFirebase(entry.key, Map<String, dynamic>.from(entry.value)));
+        final userData = Map<String, dynamic>.from(entry.value);
+        
+        // 過濾掉互助旗已降下的用戶
+        final flagDown = userData['flag_down'] as bool? ?? false;
+        if (!flagDown) {
+          users.add(UserModel.fromFirebase(entry.key, userData));
+        }
       }
       allUsers = users;
       currentUser = users.firstWhere((u) => u.id == user.uid, orElse: () => users.first);
@@ -200,10 +221,59 @@ class _MatchScreenState extends State<MatchScreen> {
           ),
         ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
+      body: Consumer<FlagStatusProvider>(
+        builder: (context, flagStatusProvider, child) {
+          if (isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          
+          if (flagStatusProvider.isFlagDown) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.flag_outlined,
+                    color: Colors.grey,
+                    size: 64,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    '互助旗已降下',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    '任務完成時無法進行配對',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      await flagStatusProvider.raiseFlag();
+                      _loadUsers(); // 重新載入用戶
+                    },
+                    icon: const Icon(Icons.flag),
+                    label: const Text('重新升起互助旗'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+          
+          return Column(
+            children: [
                 // 配對模式切換
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -260,7 +330,9 @@ class _MatchScreenState extends State<MatchScreen> {
                     ),
                   ),
               ],
-            ),
+            );
+        },
+      ),
     );
   }
 
