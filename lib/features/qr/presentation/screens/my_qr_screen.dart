@@ -34,7 +34,15 @@ class _MyQrScreenState extends State<MyQrScreen> with TickerProviderStateMixin {
     final isDesktop = screenSize.width > 600;
     final user = FirebaseAuth.instance.currentUser;
     final uid = user?.uid ?? '';
+    
+    // 🎯 這裡是關鍵！QR 碼的內容就是動態路由的 URL
+    // 當別人掃描這個 QR 碼時，會跳轉到 /user/{你的uid} 這個動態路由
     final qrData = 'https://auto30next.alearn.org.tw/user/$uid';
+    
+    // 📝 教學重點：
+    // 1. uid 是每個用戶的唯一識別碼（像學號一樣）
+    // 2. /user/$uid 就是動態路由，$uid 會被替換成實際的用戶ID
+    // 3. 例如：/user/abc123 就會顯示 abc123 這個用戶的個人頁面
     
     return Scaffold(
       appBar: AppBar(
@@ -655,55 +663,80 @@ class ScanQRCodeTab extends StatelessWidget {
   }
 
   void _startScanning(BuildContext context) {
-    // 模擬掃描成功
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('掃描成功！'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircleAvatar(
-              radius: isDesktop ? 40 : 30,
-              backgroundColor: Colors.orange,
-              child: Icon(
-                Icons.person, 
-                color: Colors.white, 
-                size: isDesktop ? 40 : 30
+    // 🎯 實際的掃描功能應該會掃描到類似這樣的 URL：
+    // https://auto30next.alearn.org.tw/user/someUserId
+    
+    // 模擬掃描到的 QR 碼內容
+    final scannedUrl = 'https://auto30next.alearn.org.tw/user/testUser123';
+    
+    // 📝 教學重點：從 URL 中提取用戶 ID
+    // 例如：從 "https://auto30next.alearn.org.tw/user/testUser123" 
+    // 提取出 "testUser123"
+    final uri = Uri.parse(scannedUrl);
+    final pathSegments = uri.pathSegments; // ['user', 'testUser123']
+    
+    if (pathSegments.length >= 2 && pathSegments[0] == 'user') {
+      final scannedUserId = pathSegments[1]; // 'testUser123'
+      
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('掃描成功！'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircleAvatar(
+                radius: isDesktop ? 40 : 30,
+                backgroundColor: Colors.orange,
+                child: Icon(
+                  Icons.person, 
+                  color: Colors.white, 
+                  size: isDesktop ? 40 : 30
+                ),
               ),
-            ),
-            SizedBox(height: isDesktop ? 16 : 12),
-            Text(
-              '小明的互助旗',
-              style: TextStyle(
-                fontSize: isDesktop ? 20 : 18,
-                fontWeight: FontWeight.bold,
+              SizedBox(height: isDesktop ? 16 : 12),
+              Text(
+                '發現互助旗！',
+                style: TextStyle(
+                  fontSize: isDesktop ? 20 : 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
+              Text(
+                '用戶 ID: $scannedUserId',
+                style: TextStyle(fontSize: isDesktop ? 16 : 14),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('取消'),
             ),
-            Text(
-              '17 歲 • 喜歡程式設計和數學',
-              style: TextStyle(fontSize: isDesktop ? 16 : 14),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                
+                // 🚀 這裡是關鍵！使用動態路由跳轉到被掃描用戶的個人頁面
+                // context.push('/user/$scannedUserId') 會跳轉到動態路由
+                context.push('/user/$scannedUserId');
+                
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('正在查看用戶資料...')),
+                );
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.orange),
+              child: const Text('查看詳情'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('已查看小明的互助旗')),
-              );
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.orange),
-            child: const Text('查看詳情'),
-          ),
-        ],
-      ),
-    );
+      );
+    } else {
+      // 掃描到的不是有效的用戶 QR 碼
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('無效的 QR 碼格式')),
+      );
+    }
   }
 
   void _selectFromGallery(BuildContext context) {

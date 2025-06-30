@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
 
@@ -60,6 +61,9 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    final isLoggedIn = currentUser != null;
+    
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.showAsFlag ? '互助旗' : '用戶資料'),
@@ -69,12 +73,51 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
             if (context.canPop()) {
               context.pop();
             } else {
-              context.go('/');
+              // 🎯 如果未登入，返回登入頁面；已登入則返回首頁
+              context.go(isLoggedIn ? '/' : '/login');
             }
           },
         ),
+        actions: [
+          // 🔐 如果未登入，顯示登入按鈕
+          if (!isLoggedIn)
+            TextButton(
+              onPressed: () => context.go('/login'),
+              child: const Text(
+                '登入',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+        ],
       ),
-      body: _buildBody(),
+      body: Column(
+        children: [
+          // 🔔 未登入用戶提示
+          if (!isLoggedIn)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              color: Colors.orange.shade100,
+              child: Row(
+                children: [
+                  const Icon(Icons.info, color: Colors.orange),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '您正在以訪客身份瀏覽。登入後可使用更多功能！',
+                      style: TextStyle(color: Colors.orange.shade800),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => context.go('/login'),
+                    child: const Text('立即登入'),
+                  ),
+                ],
+              ),
+            ),
+          Expanded(child: _buildBody()),
+        ],
+      ),
     );
   }
 

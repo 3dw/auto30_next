@@ -20,9 +20,20 @@ class AppRouter {
       redirect: (context, state) {
         final isAuthenticated = authProvider.isAuthenticated;
         final isLoggingIn = state.matchedLocation == '/login';
+        
+        // 🎯 允許未登入用戶訪問的公開頁面
+        final publicPaths = [
+          '/login',
+          '/user/',     // 用戶詳細頁面
+          '/flag/',     // 互助旗頁面
+        ];
+        
+        // 檢查是否為公開路徑
+        final isPublicPath = publicPaths.any((path) => 
+          state.matchedLocation.startsWith(path));
 
-        // 如果未登入且不在登入頁面，導向登入頁面
-        if (!isAuthenticated && !isLoggingIn) {
+        // 如果未登入且不在登入頁面且不是公開頁面，導向登入頁面
+        if (!isAuthenticated && !isLoggingIn && !isPublicPath) {
           return '/login';
         }
 
