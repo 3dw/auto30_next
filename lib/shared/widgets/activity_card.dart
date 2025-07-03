@@ -97,6 +97,54 @@ class ActivityCard extends StatelessWidget {
                           ),
                         ),
                         
+                        // 註冊日期和互助旗狀態（僅新朋友活動）
+                        if (activity.type == ActivityType.newFriend) ...[
+                          if (activity.registrationDate != null) ...[
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Text(
+                                  '註冊於 ${_formatRegistrationDate(activity.registrationDate!)}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.blue[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                if (activity.hasFlag)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.orange.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: Colors.orange.withOpacity(0.5)),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.flag,
+                                          size: 12,
+                                          color: Colors.orange[700],
+                                        ),
+                                        const SizedBox(width: 2),
+                                        Text(
+                                          '互助旗',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: Colors.orange[700],
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ],
+                        
                         // 描述（如果存在）
                         if (activity.description != null) ...[
                           const SizedBox(height: 4),
@@ -205,6 +253,23 @@ class ActivityCard extends StatelessWidget {
           context.push('/profile/${activity.userId}');
         }
         break;
+    }
+  }
+
+  String _formatRegistrationDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+    
+    if (difference.inDays == 0) {
+      return '今天';
+    } else if (difference.inDays == 1) {
+      return '昨天';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays}天前';
+    } else if (difference.inDays < 30) {
+      return '${difference.inDays ~/ 7}週前';
+    } else {
+      return '${date.year}年${date.month}月${date.day}日';
     }
   }
 }

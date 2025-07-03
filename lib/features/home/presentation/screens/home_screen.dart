@@ -304,43 +304,12 @@ class _RecentActivitySectionState extends State<_RecentActivitySection> {
                         ),
                       ),
                     ),
-                  const SizedBox(width: 8),
-                  // 測試按鈕（開發階段）
-                  PopupMenuButton<String>(
-                    icon: const Icon(Icons.add_circle_outline),
-                    onSelected: (value) async {
-                      switch (value) {
-                        case 'new_friend':
-                          await activityProvider.simulateNewFriend();
-                          break;
-                        case 'nearby_event':
-                          await activityProvider.simulateNearbyEvent();
-                          break;
-                        case 'match_success':
-                          await activityProvider.simulateMatchSuccess();
-                          break;
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'new_friend',
-                        child: Text('模擬新朋友'),
-                      ),
-                      const PopupMenuItem(
-                        value: 'nearby_event',
-                        child: Text('模擬附近聚會'),
-                      ),
-                      const PopupMenuItem(
-                        value: 'match_success',
-                        child: Text('模擬配對成功'),
-                      ),
-                    ],
-                  ),
+
                 ],
               ),
             ),
             
-            // 活動列表
+                        // 活動列表
             if (activityProvider.isLoading)
               const Center(
                 child: Padding(
@@ -348,13 +317,20 @@ class _RecentActivitySectionState extends State<_RecentActivitySection> {
                   child: CircularProgressIndicator(),
                 ),
               )
-            else if (recentActivities.isEmpty)
-              const _EmptyActivityState()
-            else
-                            ...recentActivities.map((activity) => ActivityCard(
-                activity: activity,
-                onMarkAsRead: () => activityProvider.markAsRead(activity.id),
-              )),
+            else ...[
+              // 檢查是否有符合條件的新朋友活動，如果沒有則顯示提示訊息
+              if (!activityProvider.hasQualifiedNewFriends())
+                _NoQualifiedNewFriendsCard(),
+              
+              // 顯示其他活動
+              if (recentActivities.isEmpty && activityProvider.hasQualifiedNewFriends())
+                const _EmptyActivityState()
+              else
+                ...recentActivities.map((activity) => ActivityCard(
+                  activity: activity,
+                  onMarkAsRead: () => activityProvider.markAsRead(activity.id),
+                )),
+            ],
               
               // 查看更多按鈕
               if (recentActivities.isNotEmpty && recentActivities.length >= 5)
@@ -417,6 +393,72 @@ class _EmptyActivityState extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _NoQualifiedNewFriendsCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: Card(
+        elevation: 1,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: Colors.orange.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 圖示
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.person_add,
+                  color: Colors.orange,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              
+              // 內容
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '新朋友加入',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange[700],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '30天內沒有新註冊且有升起互助旗的新朋友',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

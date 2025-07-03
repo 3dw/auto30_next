@@ -20,6 +20,8 @@ class Activity {
   final String? distance;
   final List<String>? matchedInterests;
   final bool isRead;
+  final DateTime? registrationDate; // 用戶註冊日期（僅用於新朋友活動）
+  final bool hasFlag; // 是否有升起互助旗（僅用於新朋友活動）
 
   Activity({
     required this.id,
@@ -35,6 +37,8 @@ class Activity {
     this.distance,
     this.matchedInterests,
     this.isRead = false,
+    this.registrationDate,
+    this.hasFlag = false,
   });
 
   // 獲取活動圖示
@@ -94,6 +98,8 @@ class Activity {
     String? distance,
     List<String>? matchedInterests,
     bool? isRead,
+    DateTime? registrationDate,
+    bool? hasFlag,
   }) {
     return Activity(
       id: id ?? this.id,
@@ -109,6 +115,8 @@ class Activity {
       distance: distance ?? this.distance,
       matchedInterests: matchedInterests ?? this.matchedInterests,
       isRead: isRead ?? this.isRead,
+      registrationDate: registrationDate ?? this.registrationDate,
+      hasFlag: hasFlag ?? this.hasFlag,
     );
   }
 
@@ -128,6 +136,8 @@ class Activity {
       'distance': distance,
       'matchedInterests': matchedInterests,
       'isRead': isRead,
+      'registrationDate': registrationDate?.millisecondsSinceEpoch,
+      'hasFlag': hasFlag,
     };
   }
 
@@ -149,6 +159,10 @@ class Activity {
           ? List<String>.from(map['matchedInterests'])
           : null,
       isRead: map['isRead'] ?? false,
+      registrationDate: map['registrationDate'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['registrationDate'])
+          : null,
+      hasFlag: map['hasFlag'] ?? false,
     );
   }
 }
@@ -159,16 +173,33 @@ class ActivityFactory {
     required String userName,
     required String userId,
     String? description,
+    DateTime? registrationDate,
+    bool hasFlag = false,
   }) {
+    final regDate = registrationDate ?? DateTime.now();
+    final now = DateTime.now();
+    final daysSinceRegistration = now.difference(regDate).inDays;
+    
+    String subtitle;
+    if (daysSinceRegistration == 0) {
+      subtitle = '$userName今天註冊了平台並升起互助旗';
+    } else if (daysSinceRegistration == 1) {
+      subtitle = '$userName昨天註冊了平台並升起互助旗';
+    } else {
+      subtitle = '$userName於${daysSinceRegistration}天前註冊了平台並升起互助旗';
+    }
+    
     return Activity(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       type: ActivityType.newFriend,
       title: '新朋友加入',
-      subtitle: '$userName剛剛註冊了平台',
+      subtitle: subtitle,
       description: description,
       timestamp: DateTime.now(),
       userId: userId,
       userName: userName,
+      registrationDate: regDate,
+      hasFlag: hasFlag,
     );
   }
 

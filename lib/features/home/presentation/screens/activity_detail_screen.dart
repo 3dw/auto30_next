@@ -218,13 +218,41 @@ class ActivityDetailScreen extends StatelessWidget {
             title: '用戶名',
             content: activity.userName!,
           ),
+        if (activity.registrationDate != null)
+          _buildInfoItem(
+            icon: Icons.calendar_today,
+            title: '註冊日期',
+            content: _formatDate(activity.registrationDate!),
+          ),
+        _buildInfoItem(
+          icon: Icons.flag,
+          title: '互助旗狀態',
+          content: activity.hasFlag ? '已升起互助旗' : '尚未升起互助旗',
+        ),
         _buildInfoItem(
           icon: Icons.access_time,
-          title: '加入時間',
+          title: '活動時間',
           content: activity.timeAgo,
         ),
       ],
     );
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+    
+    if (difference.inDays == 0) {
+      return '今天';
+    } else if (difference.inDays == 1) {
+      return '昨天';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays}天前';
+    } else if (difference.inDays < 30) {
+      return '${difference.inDays ~/ 7}週前';
+    } else {
+      return '${date.year}年${date.month}月${date.day}日';
+    }
   }
 
   Widget _buildNearbyEventSection(BuildContext context, Activity activity) {

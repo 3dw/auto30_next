@@ -7,16 +7,66 @@ import 'dart:math';
 class ActivityProvider with ChangeNotifier {
   final List<Activity> _activities = [];
   bool _isLoading = false;
+  int _newFriendFilterDays = 30; // 新朋友活動過濾天數，默認30天
 
-  List<Activity> get activities => List.unmodifiable(_activities);
+  List<Activity> get activities {
+    // 過濾活動：新朋友活動只顯示指定天數內註冊且有升起互助旗的用戶
+    final filteredActivities = _activities.where((activity) {
+      if (activity.type == ActivityType.newFriend) {
+        if (activity.registrationDate != null) {
+          final filterDate = DateTime.now().subtract(Duration(days: _newFriendFilterDays));
+          return activity.registrationDate!.isAfter(filterDate) && activity.hasFlag;
+        }
+        return false; // 如果沒有註冊日期，不顯示
+      }
+      return true; // 其他類型的活動正常顯示
+    }).toList();
+    
+    return List.unmodifiable(filteredActivities);
+  }
   bool get isLoading => _isLoading;
+  int get newFriendFilterDays => _newFriendFilterDays;
 
   // 獲取未讀活動數量
-  int get unreadCount => _activities.where((activity) => !activity.isRead).length;
+  int get unreadCount => activities.where((activity) => !activity.isRead).length;
+
+  // 設置新朋友活動過濾天數
+  void setNewFriendFilterDays(int days) {
+    if (days != _newFriendFilterDays) {
+      _newFriendFilterDays = days;
+      notifyListeners();
+    }
+  }
+
+  // 檢查是否有符合條件的新朋友（指定天數內註冊且有升起互助旗）
+  bool hasQualifiedNewFriends() {
+    return _activities.any((activity) {
+      if (activity.type == ActivityType.newFriend) {
+        if (activity.registrationDate != null) {
+          final filterDate = DateTime.now().subtract(Duration(days: _newFriendFilterDays));
+          return activity.registrationDate!.isAfter(filterDate) && activity.hasFlag;
+        }
+      }
+      return false;
+    });
+  }
+
+  // 獲取符合條件的新朋友數量
+  int getQualifiedNewFriendsCount() {
+    return _activities.where((activity) {
+      if (activity.type == ActivityType.newFriend) {
+        if (activity.registrationDate != null) {
+          final filterDate = DateTime.now().subtract(Duration(days: _newFriendFilterDays));
+          return activity.registrationDate!.isAfter(filterDate) && activity.hasFlag;
+        }
+      }
+      return false;
+    }).length;
+  }
 
   // 獲取最近的活動（限制數量）
   List<Activity> getRecentActivities([int limit = 10]) {
-    final sortedActivities = List<Activity>.from(_activities);
+    final sortedActivities = List<Activity>.from(activities);
     sortedActivities.sort((a, b) => b.timestamp.compareTo(a.timestamp));
     return sortedActivities.take(limit).toList();
   }
@@ -113,11 +163,15 @@ class ActivityProvider with ChangeNotifier {
     required String userName,
     required String userId,
     String? description,
+    DateTime? registrationDate,
+    bool hasFlag = false,
   }) async {
     final activity = ActivityFactory.createNewFriendActivity(
       userName: userName,
       userId: userId,
       description: description,
+      registrationDate: registrationDate,
+      hasFlag: hasFlag,
     );
     await addActivity(activity);
   }
@@ -159,11 +213,16 @@ class ActivityProvider with ChangeNotifier {
   // 生成示例活動（用於演示）
   Future<void> _generateSampleActivities() async {
     if (_activities.isEmpty) {
+      final now = DateTime.now();
+      
+      // 只生成指定天數內且有升起互助旗的新朋友活動
       final sampleActivities = [
         ActivityFactory.createNewFriendActivity(
           userName: '小明',
           userId: 'user_001',
           description: '來自台北的軟體工程師',
+          registrationDate: now.subtract(const Duration(days: 5)),
+          hasFlag: true,
         ),
         ActivityFactory.createNearbyEventActivity(
           eventTitle: 'Flutter 學習聚會',
@@ -181,7 +240,6 @@ class ActivityProvider with ChangeNotifier {
       ];
 
       // 設定不同的時間
-      final now = DateTime.now();
       sampleActivities[0] = sampleActivities[0].copyWith(
         timestamp: now.subtract(const Duration(minutes: 5)),
       );
@@ -200,7 +258,7 @@ class ActivityProvider with ChangeNotifier {
     }
   }
 
-  // 模擬新朋友加入
+  // 模擬新朋友加入（只生成指定天數內註冊且有升起互助旗的用戶）
   Future<void> simulateNewFriend() async {
     final names = ['小李', '小王', '小陳', '小林', '小張'];
     final descriptions = ['喜歡讀書', '熱愛運動', '愛好音樂', '程式設計師', '設計師'];
@@ -209,10 +267,18 @@ class ActivityProvider with ChangeNotifier {
     final name = names[random.nextInt(names.length)];
     final description = descriptions[random.nextInt(descriptions.length)];
     
+    // 隨機生成指定天數內的註冊日期
+    final now = DateTime.now();
+    final filterDate = now.subtract(Duration(days: _newFriendFilterDays));
+    final daysSinceRegistration = random.nextInt(_newFriendFilterDays);
+    final registrationDate = filterDate.add(Duration(days: daysSinceRegistration));
+    
     await addNewFriendActivity(
       userName: name,
       userId: 'user_${random.nextInt(1000)}',
       description: description,
+      registrationDate: registrationDate,
+      hasFlag: true, // 新朋友必須有升起互助旗
     );
   }
 

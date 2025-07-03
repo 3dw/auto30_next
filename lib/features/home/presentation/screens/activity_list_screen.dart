@@ -157,7 +157,8 @@ class _ActivityListScreenState extends State<ActivityListScreen>
               _buildActivityList(provider.activities),
               _buildActivityList(provider.activities
                   .where((a) => a.type == ActivityType.newFriend)
-                  .toList()),
+                  .toList(), 
+                  showNewFriendMessage: true),
               _buildActivityList(provider.activities
                   .where((a) => a.type == ActivityType.nearbyEvent)
                   .toList()),
@@ -171,24 +172,30 @@ class _ActivityListScreenState extends State<ActivityListScreen>
     );
   }
 
-  Widget _buildActivityList(List<Activity> activities) {
+  Widget _buildActivityList(List<Activity> activities, {bool showNewFriendMessage = false}) {
     if (activities.isEmpty) {
-      return const Center(
+      String emptyMessage = '暫無活動';
+      if (showNewFriendMessage) {
+        emptyMessage = '30天內沒有新註冊且有升起互助旗的新朋友';
+      }
+      
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.notifications_none,
+              showNewFriendMessage ? Icons.person_add : Icons.notifications_none,
               size: 64,
               color: Colors.grey,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
-              '暫無活動',
-              style: TextStyle(
+              emptyMessage,
+              style: const TextStyle(
                 fontSize: 18,
                 color: Colors.grey,
               ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
