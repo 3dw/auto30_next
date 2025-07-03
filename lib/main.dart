@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:auto30_next/core/config/app_config.dart';
 import 'package:auto30_next/core/theme/app_theme.dart';
 import 'package:auto30_next/features/auth/presentation/providers/auth_provider.dart';
+import 'package:auto30_next/features/home/providers/activity_provider.dart';
 import 'package:auto30_next/core/providers/theme_provider.dart';
 import 'package:auto30_next/core/providers/flag_status_provider.dart';
 import 'package:auto30_next/core/config/firebase_options.dart';
@@ -49,6 +50,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => ActivityProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => FlagStatusProvider()),
         // Add other providers here

@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:auto30_next/features/auth/presentation/providers/auth_provider.dart';
+import 'package:auto30_next/features/home/providers/activity_provider.dart';
 import 'package:auto30_next/features/learning_center/presentation/screens/learning_center_screen.dart';
 import 'package:auto30_next/features/quick_practice/presentation/screens/quick_practice_screen.dart';
 import 'package:auto30_next/features/social/presentation/screens/social_main_screen.dart';
+import 'package:auto30_next/shared/widgets/activity_card.dart';
+import 'package:auto30_next/shared/models/activity_model.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -245,70 +248,179 @@ class _QuickFeatureCard extends StatelessWidget {
   }
 }
 
-class _RecentActivitySection extends StatelessWidget {
+class _RecentActivitySection extends StatefulWidget {
   const _RecentActivitySection();
+  
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Text('最近活動',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(color: Theme.of(context).colorScheme.primary)),
-        ),
-        ..._recentActivities
-            .map((activity) => _ActivityCard(activity: activity)),
-      ],
-    );
-  }
+  State<_RecentActivitySection> createState() => _RecentActivitySectionState();
 }
 
-class _ActivityCard extends StatelessWidget {
-  final Map<String, dynamic> activity;
-  const _ActivityCard({required this.activity});
+class _RecentActivitySectionState extends State<_RecentActivitySection> {
+  @override
+  void initState() {
+    super.initState();
+    // 初始化活動數據
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ActivityProvider>().initialize();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Theme.of(context).colorScheme.surface.withAlpha((0.7 * 255).toInt()),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: ListTile(
-        leading: Icon(activity['icon'] as IconData,
-            color: Theme.of(context).colorScheme.primary, size: 28),
-        title: Text(activity['title'] as String,
-            style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text(activity['subtitle'] as String),
-        trailing: Text(activity['time'] as String,
-            style: const TextStyle(fontSize: 13, color: Colors.black54)),
+    return Consumer<ActivityProvider>(
+      builder: (context, activityProvider, child) {
+        final recentActivities = activityProvider.getRecentActivities(5);
+        
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 標題欄
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '最近活動',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(color: Theme.of(context).colorScheme.primary),
+                    ),
+                  ),
+                  if (activityProvider.unreadCount > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${activityProvider.unreadCount}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  const SizedBox(width: 8),
+                  // 測試按鈕（開發階段）
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.add_circle_outline),
+                    onSelected: (value) async {
+                      switch (value) {
+                        case 'new_friend':
+                          await activityProvider.simulateNewFriend();
+                          break;
+                        case 'nearby_event':
+                          await activityProvider.simulateNearbyEvent();
+                          break;
+                        case 'match_success':
+                          await activityProvider.simulateMatchSuccess();
+                          break;
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'new_friend',
+                        child: Text('模擬新朋友'),
+                      ),
+                      const PopupMenuItem(
+                        value: 'nearby_event',
+                        child: Text('模擬附近聚會'),
+                      ),
+                      const PopupMenuItem(
+                        value: 'match_success',
+                        child: Text('模擬配對成功'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            
+            // 活動列表
+            if (activityProvider.isLoading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            else if (recentActivities.isEmpty)
+              const _EmptyActivityState()
+            else
+                            ...recentActivities.map((activity) => ActivityCard(
+                activity: activity,
+                onMarkAsRead: () => activityProvider.markAsRead(activity.id),
+              )),
+              
+              // 查看更多按鈕
+              if (recentActivities.isNotEmpty && recentActivities.length >= 5)
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: TextButton(
+                    onPressed: () => context.push('/activities'),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('查看更多活動'),
+                        SizedBox(width: 4),
+                        Icon(Icons.arrow_forward_ios, size: 16),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+class _EmptyActivityState extends StatelessWidget {
+  const _EmptyActivityState();
+  
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface.withAlpha((0.5 * 255).toInt()),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.notifications_none,
+            size: 48,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '暫無最近活動',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '當有新朋友加入、附近有學習聚會或配對成功時，\n活動會在這裡顯示',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[500],
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
 }
-
-const _recentActivities = [
-  {
-    'icon': Icons.person_add,
-    'title': '新朋友加入',
-    'subtitle': '小明剛剛註冊了平台',
-    'time': '5分鐘前',
-  },
-  {
-    'icon': Icons.event,
-    'title': '附近的學習聚會',
-    'subtitle': '距離你 500 公尺',
-    'time': '1小時前',
-  },
-  {
-    'icon': Icons.favorite,
-    'title': '興趣配對成功',
-    'subtitle': '你和小華都喜歡程式設計',
-    'time': '3小時前',
-  },
-];
 
 class _PlatformFeatureSection extends StatelessWidget {
   const _PlatformFeatureSection();
