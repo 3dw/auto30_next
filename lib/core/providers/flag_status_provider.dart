@@ -76,7 +76,14 @@ class FlagStatusProvider extends ChangeNotifier {
           debugPrint('狀態一致，無需更新');
         }
       } else {
-        debugPrint('Firebase 中沒有 flag_down 資料，使用預設值 false');
+        debugPrint('Firebase 中沒有 flag_down 資料，將本地狀態上傳到 Firebase');
+        // 當 Firebase 中沒有資料時，將本地狀態上傳到 Firebase
+        try {
+          await _saveToFirebase();
+          debugPrint('成功將本地狀態 ($_isFlagDown) 上傳到 Firebase');
+        } catch (e) {
+          debugPrint('上傳本地狀態到 Firebase 失敗: $e');
+        }
       }
     } catch (e) {
       debugPrint('從 Firebase 同步互助旗狀態時發生錯誤: $e');

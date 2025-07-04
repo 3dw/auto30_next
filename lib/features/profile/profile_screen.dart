@@ -200,6 +200,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return {...fromChips, ...fromText}.toList().join(', ');
       }
 
+      // 先讀取現有數據，保留重要欄位（如 flag_down）
+      Map<String, dynamic>? existingData;
+      try {
+        final snapshot = await _database.child('users/${user.uid}').get();
+        if (snapshot.exists && snapshot.value != null) {
+          existingData = Map<String, dynamic>.from(snapshot.value as Map);
+        }
+      } catch (e) {
+        print('讀取現有資料時發生錯誤: $e');
+      }
+
       final latStr = _latlng != null ? '${_latlng!['lat']},${_latlng!['lng']}' : null;
       final data = {
         'name': _nameController.text,
@@ -223,9 +234,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'available_time': _availableTimeController.text,
         'oldest_child_birth': _oldestChildBirthController.text,
         'youngest_child_birth': _youngestChildBirthController.text,
+        
+        // 🔧 保留重要的系統欄位，防止被刪除
+        if (existingData != null) ...{
+          if (existingData['flag_down'] != null) 'flag_down': existingData['flag_down'],
+          if (existingData['last_flag_update'] != null) 'last_flag_update': existingData['last_flag_update'],
+        },
       };
 
-      await _database.child('users/${user.uid}').set(data);
+      // 使用 update() 而不是 set() 來避免刪除其他欄位
+      await _database.child('users/${user.uid}').update(data);
+
+      print('個人資料已保存，保留了 flag_down 相關欄位');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
