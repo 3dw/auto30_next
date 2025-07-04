@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:auto30_next/core/providers/theme_provider.dart';
 import 'package:auto30_next/core/providers/flag_status_provider.dart';
+import 'package:auto30_next/utils/firebase_test.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -37,6 +38,10 @@ class SettingsScreen extends StatelessWidget {
               // 互助旗狀態設定區塊
               _buildSectionHeader('互助旗狀態'),
               _buildFlagStatusCard(context, flagStatusProvider),
+              
+              // 診斷按鈕（開發用）
+              const SizedBox(height: 8),
+              _buildDiagnosticCard(context, flagStatusProvider),
               
               const SizedBox(height: 24),
               
@@ -149,7 +154,17 @@ class SettingsScreen extends StatelessWidget {
                     activeColor: Colors.orange,
                     onChanged: (value) async {
                       try {
+                        // 添加診斷信息
+                        print('=== 開始切換互助旗狀態 ===');
+                        print('目標狀態: $value');
+                        await flagStatusProvider.printDiagnosis();
+                        
                         await flagStatusProvider.setFlagStatus(value);
+                        
+                        // 切換完成後再次診斷
+                        print('=== 切換完成後狀態 ===');
+                        await flagStatusProvider.printDiagnosis();
+                        
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -157,15 +172,30 @@ class SettingsScreen extends StatelessWidget {
                                 value ? '互助旗已降下 - 你將不會出現在地圖和配對中' : '互助旗已升起 - 重新開始尋求協助',
                               ),
                               backgroundColor: value ? Colors.grey : Colors.orange,
+                              action: SnackBarAction(
+                                label: '診斷',
+                                textColor: Colors.white,
+                                onPressed: () async {
+                                  await flagStatusProvider.printDiagnosis();
+                                },
+                              ),
                             ),
                           );
                         }
                       } catch (e) {
+                        print('互助旗切換失敗: $e');
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('更新狀態失敗：$e'),
                               backgroundColor: Colors.red,
+                              action: SnackBarAction(
+                                label: '查看詳情',
+                                textColor: Colors.white,
+                                onPressed: () {
+                                  _showErrorDialog(context, e.toString());
+                                },
+                              ),
                             ),
                           );
                         }
@@ -368,6 +398,396 @@ class SettingsScreen extends StatelessWidget {
         subtitle: Text(subtitle),
         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
         onTap: onTap,
+      ),
+    );
+  }
+
+  Widget _buildDiagnosticCard(BuildContext context, FlagStatusProvider flagStatusProvider) {
+    return Card(
+      color: Colors.blue.withOpacity(0.05),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.bug_report, color: Colors.blue),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    '診斷工具',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              '如果互助旗功能有問題，可以使用以下工具進行診斷：',
+              style: TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      await flagStatusProvider.printDiagnosis();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('診斷信息已輸出到控制台'),
+                            backgroundColor: Colors.blue,
+                          ),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.search, size: 16),
+                    label: const Text('打印診斷'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      final diagnosis = await flagStatusProvider.diagnose();
+                      if (context.mounted) {
+                        _showDiagnosisDialog(context, diagnosis);
+                      }
+                    },
+                    icon: const Icon(Icons.info, size: 16),
+                    label: const Text('顯示診斷'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  try {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('正在執行 Firebase 完整測試...'),
+                          backgroundColor: Colors.orange,
+                        ),
+                      );
+                    }
+                    
+                    final testResult = await FirebaseTest.fullTest();
+                    FirebaseTest.printTestResult(testResult);
+                    
+                    if (context.mounted) {
+                      _showFirebaseTestDialog(context, testResult);
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('測試執行失敗：$e'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
+                },
+                icon: const Icon(Icons.science, size: 16),
+                label: const Text('Firebase 完整測試'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDiagnosisDialog(BuildContext context, Map<String, dynamic> diagnosis) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('系統診斷結果'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: diagnosis.entries.map((entry) {
+                Color textColor = Colors.black87;
+                if (entry.key.contains('Error') || entry.value == false) {
+                  textColor = Colors.red;
+                } else if (entry.value == true) {
+                  textColor = Colors.green;
+                }
+                
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: RichText(
+                    text: TextSpan(
+                      style: const TextStyle(fontSize: 14),
+                      children: [
+                        TextSpan(
+                          text: '${entry.key}: ',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        TextSpan(
+                          text: '${entry.value}',
+                          style: TextStyle(color: textColor),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('關閉'),
+          ),
+          TextButton(
+            onPressed: () async {
+              await context.read<FlagStatusProvider>().refresh();
+              if (context.mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('已重新載入狀態'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              }
+            },
+            child: const Text('重新載入'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showFirebaseTestDialog(BuildContext context, Map<String, dynamic> testResult) {
+    final health = testResult['overall_health'] as String;
+    final suggestions = FirebaseTest.getFixSuggestions(health);
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              health == 'HEALTHY' ? Icons.check_circle : Icons.error,
+              color: health == 'HEALTHY' ? Colors.green : Colors.red,
+            ),
+            const SizedBox(width: 8),
+            const Text('Firebase 測試結果'),
+          ],
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 健康狀態
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: health == 'HEALTHY' ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: health == 'HEALTHY' ? Colors.green : Colors.red,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        health == 'HEALTHY' ? Icons.check : Icons.warning,
+                        color: health == 'HEALTHY' ? Colors.green : Colors.red,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '系統狀態: $health',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: health == 'HEALTHY' ? Colors.green[700] : Colors.red[700],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // 修復建議
+                if (suggestions.isNotEmpty) ...[
+                  const Text(
+                    '修復建議:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  ...suggestions.map((suggestion) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('• ', style: TextStyle(fontWeight: FontWeight.bold)),
+                        Expanded(child: Text(suggestion)),
+                      ],
+                    ),
+                  )),
+                  const SizedBox(height: 16),
+                ],
+                
+                // 詳細結果（折疊式）
+                ExpansionTile(
+                  title: const Text('詳細測試結果'),
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: _buildTestResultWidgets(testResult),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('關閉'),
+          ),
+          if (health != 'HEALTHY')
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                // 嘗試修復
+                await context.read<FlagStatusProvider>().refresh();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('已嘗試重新初始化系統'),
+                      backgroundColor: Colors.blue,
+                    ),
+                  );
+                }
+              },
+              child: const Text('嘗試修復'),
+            ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildTestResultWidgets(Map<String, dynamic> result) {
+    final widgets = <Widget>[];
+    
+    result.forEach((key, value) {
+      if (value is Map<String, dynamic>) {
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Text(
+              '$key:',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        );
+        value.forEach((subKey, subValue) {
+          Color textColor = Colors.black87;
+          if (subKey.contains('error') || subValue == false) {
+            textColor = Colors.red;
+          } else if (subValue == true) {
+            textColor = Colors.green;
+          }
+          
+          widgets.add(
+            Padding(
+              padding: const EdgeInsets.only(left: 16, bottom: 2),
+              child: Text(
+                '$subKey: $subValue',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: textColor,
+                ),
+              ),
+            ),
+          );
+        });
+      } else {
+        Color textColor = Colors.black87;
+        if (key.contains('error') || value == false) {
+          textColor = Colors.red;
+        } else if (value == true) {
+          textColor = Colors.green;
+        }
+        
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Text(
+              '$key: $value',
+              style: TextStyle(
+                fontSize: 12,
+                color: textColor,
+              ),
+            ),
+          ),
+        );
+      }
+    });
+    
+    return widgets;
+  }
+
+  void _showErrorDialog(BuildContext context, String error) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('錯誤詳情'),
+        content: SingleChildScrollView(
+          child: Text(error),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('關閉'),
+          ),
+        ],
       ),
     );
   }

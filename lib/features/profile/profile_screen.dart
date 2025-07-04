@@ -538,7 +538,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     activeColor: Colors.orange,
                     onChanged: (value) async {
                       try {
+                        // 添加診斷信息
+                        print('=== 個人資料頁面：切換互助旗狀態 ===');
+                        print('目標狀態: $value');
+                        await flagStatusProvider.printDiagnosis();
+                        
                         await flagStatusProvider.setFlagStatus(value);
+                        
+                        // 切換完成後再次診斷
+                        print('=== 個人資料頁面：切換完成後狀態 ===');
+                        await flagStatusProvider.printDiagnosis();
+                        
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -550,6 +560,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           );
                         }
                       } catch (e) {
+                        print('個人資料頁面：互助旗切換失敗: $e');
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(

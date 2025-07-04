@@ -51,18 +51,32 @@ class FlagStatusProvider extends ChangeNotifier {
   Future<void> _syncFromFirebase() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
+      if (user == null) {
+        debugPrint('用戶未登入，無法從 Firebase 同步狀態');
+        return;
+      }
+
+      debugPrint('開始從 Firebase 同步互助旗狀態，用戶 ID: ${user.uid}');
 
       final ref = FirebaseDatabase.instance.ref('users/${user.uid}/flag_down');
       final snapshot = await ref.get();
       
+      debugPrint('Firebase 查詢結果 - exists: ${snapshot.exists}, value: ${snapshot.value}');
+      
       if (snapshot.exists) {
         final firebaseStatus = snapshot.value as bool? ?? false;
+        debugPrint('Firebase 狀態: $firebaseStatus, 本地狀態: $_isFlagDown');
+        
         if (firebaseStatus != _isFlagDown) {
+          debugPrint('狀態不一致，更新本地狀態');
           _isFlagDown = firebaseStatus;
           await _saveToLocal();
           notifyListeners();
+        } else {
+          debugPrint('狀態一致，無需更新');
         }
+      } else {
+        debugPrint('Firebase 中沒有 flag_down 資料，使用預設值 false');
       }
     } catch (e) {
       debugPrint('從 Firebase 同步互助旗狀態時發生錯誤: $e');
@@ -83,16 +97,22 @@ class FlagStatusProvider extends ChangeNotifier {
   Future<void> _saveToFirebase() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
+      if (user == null) {
+        throw Exception('用戶未登入，無法保存到 Firebase');
+      }
+
+      debugPrint('準備保存互助旗狀態到 Firebase: flag_down = $_isFlagDown, user.uid = ${user.uid}');
 
       final ref = FirebaseDatabase.instance.ref('users/${user.uid}');
       await ref.update({
         'flag_down': _isFlagDown,
         'last_flag_update': DateTime.now().millisecondsSinceEpoch,
       });
+
+      debugPrint('成功保存互助旗狀態到 Firebase');
     } catch (e) {
       debugPrint('儲存互助旗狀態到 Firebase 時發生錯誤: $e');
-      throw e;
+      throw Exception('保存失敗：$e');
     }
   }
 
@@ -144,5 +164,65 @@ class FlagStatusProvider extends ChangeNotifier {
   /// 重新載入狀態（用於手動刷新）
   Future<void> refresh() async {
     await _loadFlagStatus();
+  }
+
+  /// 診斷功能：檢查系統狀態
+  Future<Map<String, dynamic>> diagnose() async {
+    final diagnosis = <String, dynamic>{};
+    
+    try {
+      // 檢查用戶登入狀態
+      final user = FirebaseAuth.instance.currentUser;
+      diagnosis['isUserLoggedIn'] = user != null;
+      diagnosis['userId'] = user?.uid ?? 'null';
+      diagnosis['userEmail'] = user?.email ?? 'null';
+      
+      // 檢查本地狀態
+      final prefs = await SharedPreferences.getInstance();
+      final localStatus = prefs.getBool('flag_down');
+      diagnosis['localFlagDown'] = localStatus;
+      diagnosis['currentFlagDown'] = _isFlagDown;
+      
+      // 嘗試檢查 Firebase 狀態
+      if (user != null) {
+        try {
+          final ref = FirebaseDatabase.instance.ref('users/${user.uid}/flag_down');
+          final snapshot = await ref.get();
+          diagnosis['firebaseExists'] = snapshot.exists;
+          diagnosis['firebaseFlagDown'] = snapshot.exists ? snapshot.value : 'not_exists';
+          
+          // 嘗試寫入測試
+          try {
+            final testRef = FirebaseDatabase.instance.ref('users/${user.uid}/test_write');
+            await testRef.set(DateTime.now().millisecondsSinceEpoch);
+            await testRef.remove();
+            diagnosis['firebaseWritePermission'] = true;
+          } catch (writeError) {
+            diagnosis['firebaseWritePermission'] = false;
+            diagnosis['writeError'] = writeError.toString();
+          }
+          
+        } catch (firebaseError) {
+          diagnosis['firebaseError'] = firebaseError.toString();
+        }
+      }
+      
+      diagnosis['timestamp'] = DateTime.now().toIso8601String();
+      
+    } catch (e) {
+      diagnosis['diagnoseError'] = e.toString();
+    }
+    
+    return diagnosis;
+  }
+
+  /// 打印診斷信息
+  Future<void> printDiagnosis() async {
+    final diagnosis = await diagnose();
+    debugPrint('=== 互助旗功能診斷 ===');
+    diagnosis.forEach((key, value) {
+      debugPrint('$key: $value');
+    });
+    debugPrint('==================');
   }
 } 
