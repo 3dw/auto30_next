@@ -304,7 +304,23 @@ class _RecentActivitySectionState extends State<_RecentActivitySection> {
                         ),
                       ),
                     ),
-
+                  const SizedBox(width: 8),
+                  // 添加刷新按鈕
+                  IconButton(
+                    icon: const Icon(Icons.refresh, size: 20),
+                    onPressed: () async {
+                      await activityProvider.initialize();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('活動已重新載入'),
+                            duration: Duration(seconds: 1),
+                          ),
+                        );
+                      }
+                    },
+                    tooltip: '重新載入活動',
+                  ),
                 ],
               ),
             ),
@@ -447,7 +463,7 @@ class _NoQualifiedNewFriendsCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '30天內沒有新註冊且有升起互助旗的新朋友',
+                      '2天內沒有新註冊且有升起互助旗的新朋友',
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey[700],
@@ -626,77 +642,74 @@ class _SocialFAB extends StatelessWidget {
 class _UserMenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return PopupMenuButton<String>(
-      icon: const Icon(Icons.account_circle_rounded, color: Colors.white),
-      onSelected: (value) async {
-        switch (value) {
-          case 'profile':
-            // 跳轉到個人資料頁
-            context.push('/profile');
-            break;
-          case 'settings':
-            // 跳轉到設定頁面
-            context.push('/settings');
-            break;
-          case 'logout':
-            // 顯示登出確認對話框
-            _showLogoutDialog(context);
-            break;
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        if (!authProvider.isAuthenticated) {
+          return IconButton(
+            icon: const Icon(Icons.account_circle),
+            onPressed: () => context.push('/login'),
+          );
         }
-      },
-      itemBuilder: (BuildContext context) => [
-        const PopupMenuItem<String>(
-          value: 'profile',
-          child: Row(
-            children: [
-              Icon(Icons.person, color: Colors.orange),
-              SizedBox(width: 8),
-              Text('個人資料'),
-            ],
-          ),
-        ),
-        const PopupMenuItem<String>(
-          value: 'settings',
-          child: Row(
-            children: [
-              Icon(Icons.settings, color: Colors.orange),
-              SizedBox(width: 8),
-              Text('設定'),
-            ],
-          ),
-        ),
-        const PopupMenuItem<String>(
-          value: 'logout',
-          child: Row(
-            children: [
-              Icon(Icons.logout, color: Colors.red),
-              SizedBox(width: 8),
-              Text('登出'),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
 
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('確認登出'),
-          content: const Text('確定要登出嗎？'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('取消'),
+        return PopupMenuButton<String>(
+          icon: const Icon(Icons.account_circle),
+          onSelected: (value) {
+            switch (value) {
+              case 'profile':
+                context.push('/profile');
+                break;
+              case 'settings':
+                context.push('/settings');
+                break;
+              case 'debug':
+                context.push('/debug/user');
+                break;
+              case 'logout':
+                authProvider.signOut();
+                break;
+            }
+          },
+          itemBuilder: (context) => [
+            const PopupMenuItem(
+              value: 'profile',
+              child: Row(
+                children: [
+                  Icon(Icons.person),
+                  SizedBox(width: 8),
+                  Text('個人資料'),
+                ],
+              ),
             ),
-            TextButton(
-              onPressed: () async {
-                Navigator.of(context).pop();
-                await context.read<AuthProvider>().signOut();
-              },
-              child: const Text('登出'),
+            const PopupMenuItem(
+              value: 'settings',
+              child: Row(
+                children: [
+                  Icon(Icons.settings),
+                  SizedBox(width: 8),
+                  Text('設定'),
+                ],
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'debug',
+              child: Row(
+                children: [
+                  Icon(Icons.bug_report),
+                  SizedBox(width: 8),
+                  Text('調試用戶資料'),
+                ],
+              ),
+            ),
+            const PopupMenuDivider(),
+            const PopupMenuItem(
+              value: 'logout',
+              child: Row(
+                children: [
+                  Icon(Icons.logout),
+                  SizedBox(width: 8),
+                  Text('登出'),
+                ],
+              ),
             ),
           ],
         );

@@ -176,7 +176,7 @@ class _ActivityListScreenState extends State<ActivityListScreen>
     if (activities.isEmpty) {
       String emptyMessage = '暫無活動';
       if (showNewFriendMessage) {
-        emptyMessage = '30天內沒有新註冊且有升起互助旗的新朋友';
+        emptyMessage = '2天內沒有新註冊且有升起互助旗的新朋友';
       }
       
       return Center(

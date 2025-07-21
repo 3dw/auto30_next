@@ -12,6 +12,7 @@ import 'package:auto30_next/features/social/presentation/screens/social_main_scr
 import 'package:auto30_next/features/learning_center/presentation/screens/learning_center_screen.dart';
 import 'package:auto30_next/features/profile/user_detail_screen.dart';
 import 'package:auto30_next/features/settings/presentation/screens/settings_screen.dart';
+import 'package:auto30_next/features/home/presentation/screens/debug_user_screen.dart';
 
 class AppRouter {
   static GoRouter createRouter(AuthProvider authProvider) {
@@ -136,6 +137,15 @@ class AppRouter {
           builder: (context, state) {
             final uid = state.pathParameters['uid']!;
             return UserDetailScreen(uid: uid, showAsFlag: true);
+          },
+        ),
+
+        // 調試頁面
+        GoRoute(
+          path: '/debug/user',
+          name: 'debugUser',
+          builder: (context, state) {
+            return const DebugUserScreen();
           },
         ),
       ],
