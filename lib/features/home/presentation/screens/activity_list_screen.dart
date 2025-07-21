@@ -79,9 +79,6 @@ class _ActivityListScreenState extends State<ActivityListScreen>
                 case 'nearby_event':
                   await provider.simulateNearbyEvent();
                   break;
-                case 'match_success':
-                  await provider.simulateMatchSuccess();
-                  break;
                 case 'clear_all':
                   _showClearAllDialog();
                   break;
@@ -105,16 +102,6 @@ class _ActivityListScreenState extends State<ActivityListScreen>
                     Icon(Icons.event, color: Colors.green),
                     SizedBox(width: 8),
                     Text('模擬附近聚會'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'match_success',
-                child: Row(
-                  children: [
-                    Icon(Icons.favorite, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text('模擬配對成功'),
                   ],
                 ),
               ),

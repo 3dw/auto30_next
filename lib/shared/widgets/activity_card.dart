@@ -180,6 +180,27 @@ class ActivityCard extends StatelessWidget {
               if (activity.type == ActivityType.matchSuccess &&
                   activity.matchedInterests != null) ...[
                 const SizedBox(height: 12),
+                // 配對類型和匹配度
+                if (activity.description != null && activity.description!.contains('匹配度')) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.red.withOpacity(0.3)),
+                    ),
+                    child: Text(
+                      activity.description!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.red[700],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                // 共同興趣標籤
                 Wrap(
                   spacing: 6,
                   runSpacing: 4,

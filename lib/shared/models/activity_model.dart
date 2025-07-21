@@ -228,14 +228,24 @@ class ActivityFactory {
     required String userId,
     required List<String> matchedInterests,
     String? description,
+    String? matchType,
+    int? matchScore,
   }) {
     final interestText = matchedInterests.join('、');
+    String subtitle;
+    
+    if (matchType != null && matchScore != null) {
+      subtitle = '你和$userName透過$matchType成功配對，匹配度：$matchScore%';
+    } else {
+      subtitle = '你和$userName都喜歡$interestText';
+    }
+    
     return Activity(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       type: ActivityType.matchSuccess,
       title: '興趣配對成功',
-      subtitle: '你和$userName都喜歡$interestText',
-      description: description,
+      subtitle: subtitle,
+      description: description ?? '你們有共同的興趣愛好',
       timestamp: DateTime.now(),
       userId: userId,
       userName: userName,

@@ -81,6 +81,7 @@ class ActivityProvider with ChangeNotifier {
     try {
       await _loadActivitiesFromStorage();
       await _loadRealUsersFromFirebase(); // 新增：從 Firebase 讀取真實用戶
+      await _loadRealMatchRecordsFromFirebase(); // 新增：從 Firebase 讀取真實配對記錄
       await _generateSampleActivities();
     } catch (e) {
       debugPrint('初始化活動數據失敗: $e');
@@ -213,6 +214,112 @@ class ActivityProvider with ChangeNotifier {
     }
   }
 
+  // 從 Firebase 讀取真實配對記錄
+  Future<void> _loadRealMatchRecordsFromFirebase() async {
+    try {
+      debugPrint('開始從 Firebase 讀取真實配對記錄...');
+      
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        debugPrint('用戶未登入，無法讀取配對記錄');
+        return;
+      }
+      
+      final uid = user.uid;
+      final matchesRef = FirebaseDatabase.instance.ref('matches/$uid');
+      final matchesSnapshot = await matchesRef.get();
+      
+      if (matchesSnapshot.exists && matchesSnapshot.value != null) {
+        final matchesData = Map<String, dynamic>.from(matchesSnapshot.value as Map);
+        debugPrint('找到 ${matchesData.length} 個配對記錄');
+        
+        // 讀取所有用戶資料以便獲取用戶名稱
+        final usersRef = FirebaseDatabase.instance.ref('users');
+        final usersSnapshot = await usersRef.get();
+        Map<String, Map<String, dynamic>> userMap = {};
+        
+        if (usersSnapshot.exists && usersSnapshot.value != null) {
+          final allUsers = Map<String, dynamic>.from(usersSnapshot.value as Map);
+          for (final entry in allUsers.entries) {
+            userMap[entry.key] = Map<String, dynamic>.from(entry.value);
+          }
+        }
+        
+        int createdCount = 0;
+        
+        for (final entry in matchesData.entries) {
+          final matchedUserId = entry.key;
+          final matchData = Map<String, dynamic>.from(entry.value);
+          
+          // 檢查是否已經有這個配對的活動記錄
+          final existingActivity = _activities.any((activity) => 
+            activity.type == ActivityType.matchSuccess && 
+            activity.userId == matchedUserId
+          );
+          
+          if (existingActivity) {
+            debugPrint('跳過配對記錄 $matchedUserId：已存在活動記錄');
+            continue;
+          }
+          
+          // 獲取配對對象的用戶資料
+          final matchedUserData = userMap[matchedUserId];
+          if (matchedUserData == null) {
+            debugPrint('跳過配對記錄 $matchedUserId：找不到用戶資料');
+            continue;
+          }
+          
+          final matchedUserName = matchedUserData['name'] as String? ?? '未知用戶';
+          final matchType = matchData['matchType'] as String? ?? '興趣配對';
+          final score = matchData['score'] as int? ?? 0;
+          final timestamp = matchData['timestamp'] as int?;
+          
+          // 獲取配對對象的興趣愛好
+          List<String> matchedInterests = [];
+          if (matchedUserData['learner_habit'] != null) {
+            final habits = matchedUserData['learner_habit'];
+            if (habits is List) {
+              matchedInterests = List<String>.from(habits);
+            } else if (habits is String) {
+              matchedInterests = habits.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+            }
+          }
+          
+          // 如果沒有興趣愛好，使用預設值
+          if (matchedInterests.isEmpty) {
+            matchedInterests = ['共同興趣'];
+          }
+          
+          // 創建配對成功活動
+          await addMatchSuccessActivity(
+            userName: matchedUserName,
+            userId: matchedUserId,
+            matchedInterests: matchedInterests,
+            description: '透過$matchType成功配對，匹配度：$score%',
+            matchType: matchType,
+            matchScore: score,
+          );
+          
+          // 設定配對時間
+          if (timestamp != null) {
+            final matchTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
+            final lastActivity = _activities.first;
+            _activities[0] = lastActivity.copyWith(timestamp: matchTime);
+          }
+          
+          createdCount++;
+          debugPrint('✅ 為配對記錄 $matchedUserName ($matchedUserId) 創建配對成功活動');
+        }
+        
+        debugPrint('成功為 $createdCount 個配對記錄創建活動');
+      } else {
+        debugPrint('Firebase 中沒有配對記錄');
+      }
+    } catch (e) {
+      debugPrint('從 Firebase 讀取配對記錄時發生錯誤: $e');
+    }
+  }
+
   // 從本地存儲加載活動
   Future<void> _loadActivitiesFromStorage() async {
     try {
@@ -326,12 +433,16 @@ class ActivityProvider with ChangeNotifier {
     required String userId,
     required List<String> matchedInterests,
     String? description,
+    String? matchType,
+    int? matchScore,
   }) async {
     final activity = ActivityFactory.createMatchSuccessActivity(
       userName: userName,
       userId: userId,
       matchedInterests: matchedInterests,
       description: description,
+      matchType: matchType,
+      matchScore: matchScore,
     );
     await addActivity(activity);
   }
@@ -345,7 +456,7 @@ class ActivityProvider with ChangeNotifier {
       final sampleActivities = [
         ActivityFactory.createNewFriendActivity(
           userName: '小明',
-          userId: 'user_001',
+          userId: 'sample_user_001',
           description: '來自台北的軟體工程師',
           registrationDate: now.subtract(const Duration(days: 5)),
           hasFlag: true,
@@ -357,12 +468,15 @@ class ActivityProvider with ChangeNotifier {
           longitude: 121.5654,
           description: '一起學習 Flutter 開發技術',
         ),
+        // 註解掉示例配對成功活動，因為現在會從Firebase讀取真實配對記錄
+        /*
         ActivityFactory.createMatchSuccessActivity(
           userName: '小華',
-          userId: 'user_002',
+          userId: 'sample_user_002',
           matchedInterests: ['程式設計', 'Flutter'],
           description: '你們都對 Flutter 開發有興趣',
         ),
+        */
       ];
 
       // 設定不同的時間
@@ -372,9 +486,12 @@ class ActivityProvider with ChangeNotifier {
       sampleActivities[1] = sampleActivities[1].copyWith(
         timestamp: now.subtract(const Duration(hours: 1)),
       );
+      // 註解掉配對成功活動的時間設定
+      /*
       sampleActivities[2] = sampleActivities[2].copyWith(
         timestamp: now.subtract(const Duration(hours: 3)),
       );
+      */
 
       for (final activity in sampleActivities) {
         _activities.add(activity);
@@ -399,9 +516,12 @@ class ActivityProvider with ChangeNotifier {
     final daysSinceRegistration = random.nextInt(_newFriendFilterDays);
     final registrationDate = filterDate.add(Duration(days: daysSinceRegistration));
     
+    // 生成更真實的用戶ID
+    final userId = 'demo_user_${DateTime.now().millisecondsSinceEpoch}_${random.nextInt(1000)}';
+    
     await addNewFriendActivity(
       userName: name,
-      userId: 'user_${random.nextInt(1000)}',
+      userId: userId,
       description: description,
       registrationDate: registrationDate,
       hasFlag: true, // 新朋友必須有升起互助旗
@@ -435,24 +555,7 @@ class ActivityProvider with ChangeNotifier {
 
   // 模擬興趣配對成功
   Future<void> simulateMatchSuccess() async {
-    final names = ['小美', '小強', '小芳', '小偉', '小雯'];
-    final interests = [
-      ['程式設計', 'Flutter'],
-      ['音樂', '吉他'],
-      ['運動', '游泳'],
-      ['閱讀', '文學'],
-      ['旅行', '攝影'],
-    ];
-    
-    final random = Random();
-    final name = names[random.nextInt(names.length)];
-    final interest = interests[random.nextInt(interests.length)];
-    
-    await addMatchSuccessActivity(
-      userName: name,
-      userId: 'user_${random.nextInt(1000)}',
-      matchedInterests: interest,
-      description: '你們有共同的興趣愛好',
-    );
+    // 移除模擬配對成功功能，現在使用真實的Firebase配對記錄
+    debugPrint('配對成功功能已改為使用真實Firebase資料');
   }
 } 
