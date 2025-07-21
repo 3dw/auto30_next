@@ -1,0 +1,135 @@
+{
+  "rules": {
+    "users": {
+      ".read": "auth != null",
+      "$userId": {
+        ".read": "auth != null",
+        ".write": "$userId === auth.uid",
+        "private": {
+          ".read": "$userId === auth.uid",
+          ".write": "$userId === auth.uid"
+        },
+        "learningProgress": {
+          ".read": "$userId === auth.uid",
+          ".write": "$userId === auth.uid"
+        },
+        "notifications": {
+          ".read": "$userId === auth.uid",
+          ".write": "auth != null"
+        }
+      }
+    },
+    "learning": {
+      "courses": {
+        ".read": "auth != null",
+        ".write": "false"
+      },
+      "userProgress": {
+        "$userId": {
+          ".read": "$userId === auth.uid",
+          ".write": "$userId === auth.uid"
+        }
+      },
+      "practice": {
+        "questions": {
+          ".read": "auth != null",
+          ".write": "false"
+        },
+        "userAnswers": {
+          "$userId": {
+            ".read": "$userId === auth.uid",
+            ".write": "$userId === auth.uid"
+          }
+        }
+      }
+    },
+    "social": {
+      "profiles": {
+        ".read": "auth != null",
+        "$userId": {
+          ".write": "$userId === auth.uid"
+        }
+      },
+      "matching": {
+        "requests": {
+          "$requestId": {
+            ".read": "data.child('fromUser').val() === auth.uid || data.child('toUser').val() === auth.uid",
+            ".write": "data.child('fromUser').val() === auth.uid || data.child('toUser').val() === auth.uid"
+          }
+        },
+        "friends": {
+          "$userId": {
+            ".read": "$userId === auth.uid",
+            ".write": "$userId === auth.uid"
+          }
+        }
+      },
+      "groups": {
+        ".read": "auth != null",
+        "$groupId": {
+          ".write": "data.child('members').child(auth.uid).exists() || !data.exists()",
+          "messages": {
+            ".read": "root.child('social/groups/' + $groupId + '/members').child(auth.uid).exists()",
+            ".write": "root.child('social/groups/' + $groupId + '/members').child(auth.uid).exists()"
+          }
+        }
+      },
+      "qrCodes": {
+        "$userId": {
+          ".read": "auth != null",
+          ".write": "$userId === auth.uid"
+        }
+      }
+    },
+    "chats": {
+      "$chatId": {
+        ".read": "data.child('participants').child(auth.uid).exists()",
+        ".write": "data.child('participants').child(auth.uid).exists()",
+        "messages": {
+          "$messageId": {
+            ".validate": "newData.hasChildren(['text', 'timestamp', 'sender']) && newData.child('sender').val() === auth.uid"
+          }
+        }
+      }
+    },
+    "locations": {
+      "places": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      },
+      "userLocations": {
+        "$userId": {
+          ".read": "$userId === auth.uid",
+          ".write": "$userId === auth.uid"
+        }
+      }
+    },
+    "announcements": {
+      ".read": "auth != null",
+      ".write": "false"
+    },
+    "feedback": {
+      ".read": "false",
+      ".write": "auth != null"
+    },
+    "system": {
+      "version": {
+        ".read": "true",
+        ".write": "false"
+      },
+      "maintenance": {
+        ".read": "true",
+        ".write": "false"
+      }
+    },
+    "matches": {
+      "$userId": {
+        ".read": "$userId === auth.uid",
+        ".write": "$userId === auth.uid",
+        "$otherId": {
+          ".write": "$userId === auth.uid"
+        }
+      }
+    }
+  }
+} 

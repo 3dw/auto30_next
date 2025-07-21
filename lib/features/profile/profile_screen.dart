@@ -4,7 +4,9 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:auto30_next/core/providers/flag_status_provider.dart';
+import 'package:auto30_next/services/account_deletion_service.dart';
 import 'location_picker_screen.dart';
 
 // Helper function to safely parse coordinate values.
@@ -63,6 +65,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Map<String, double>? _latlng;
 
   bool _isLoading = true;
+  
+  // 帳號刪除服務
+  final AccountDeletionService _deletionService = AccountDeletionService();
   
   final List<String> _availableHabits = [
     '程式設計', '數學', '物理', '化學', '生物', '歷史', '地理', '文學', '藝術', '音樂',
@@ -262,6 +267,109 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } finally {
        if(mounted) {
         setState(() => _isLoading = false);
+      }
+         }
+   }
+
+  /// 執行簡化版帳號刪除（跳過重新認證）
+  Future<void> _executeSimpleAccountDeletion() async {
+    // 顯示警告對話框
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('⚠️ 簡化刪除'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('簡化刪除會：'),
+            Text('✅ 清除你在資料庫中的所有資料'),
+            Text('✅ 刪除配對記錄'),
+            Text('✅ 清除本地儲存'),
+            SizedBox(height: 8),
+            Text('但可能無法：'),
+            Text('❌ 完全刪除 Firebase 帳號'),
+            SizedBox(height: 16),
+            Text(
+              '這意味著你的資料會被清除，但可能仍需要重新登入才能完全刪除帳號。',
+              style: TextStyle(color: Colors.orange),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('取消'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('繼續簡化刪除'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    // 顯示載入對話框
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('正在執行簡化刪除...'),
+            Text('清除資料中，請稍候'),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      await _deletionService.deleteUserAccountSimple();
+      
+      if (mounted) {
+        Navigator.of(context).pop(); // 關閉載入對話框
+        
+        // 顯示成功訊息
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            title: const Text('✅ 資料清除成功'),
+            content: const Text(
+              '你的資料已經從系統中清除。\n\n'
+              '如果需要完全刪除 Firebase 帳號，請重新登入後再次嘗試完整刪除。'
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  context.go('/login');
+                },
+                child: const Text('前往登入頁面'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.of(context).pop(); // 關閉載入對話框
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('簡化刪除失敗：$e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
       }
     }
   }
@@ -502,6 +610,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                     ),
+                    
+                    const SizedBox(height: 16),
+                    
+                    // 🗑️ 完整刪除互助旗和帳號按鈕
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _showDeleteAccountDialog,
+                        icon: const Icon(Icons.delete_forever),
+                        label: const Text('完整刪除互助旗和帳號'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -674,6 +799,311 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+
+  /// 顯示刪除帳號確認對話框
+  void _showDeleteAccountDialog() async {
+    // 檢查用戶是否有權限刪除帳號
+    final canDelete = await _deletionService.canDeleteAccount();
+    if (!canDelete) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('當前帳號無法執行刪除操作'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+
+    // 檢查 Firebase 資料庫權限
+    final permissions = await _deletionService.checkDatabasePermissions();
+    debugPrint('Firebase 權限檢查結果: $permissions');
+
+    // 先獲取要刪除的資料摘要
+    final dataSummary = await _deletionService.getDataSummary();
+    
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false, // 不能點外面關閉
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.warning, color: Colors.red),
+              SizedBox(width: 8),
+              Text('⚠️ 危險操作'),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  '你即將完整刪除你的帳號和所有資料，這個操作無法復原！',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text('📋 將會刪除的資料：'),
+                const SizedBox(height: 8),
+                
+                // 顯示資料摘要
+                if (dataSummary['userData'] != null) ...[
+                  Text('👤 姓名：${dataSummary['userData']['name']}'),
+                  Text('📧 信箱：${dataSummary['userData']['email']}'),
+                  Text('📍 地區：${dataSummary['userData']['address']}'),
+                  Text('🎭 身份：${dataSummary['userData']['learnerRole']}'),
+                  Text('📅 註冊時間：${dataSummary['userData']['registrationDate']}'),
+                ],
+                Text('🤝 配對記錄：${dataSummary['matchCount']} 筆'),
+                Text('🚩 互助旗狀態：${dataSummary['flagStatus']}'),
+                Text('🔐 登入方式：${dataSummary['loginMethod']}'),
+                                 Text('📆 帳號年齡：${dataSummary['accountAge']} 天'),
+                 
+                 const SizedBox(height: 16),
+                 
+                 // 顯示權限狀態
+                 const Text(
+                   '🔐 資料庫權限狀態：',
+                   style: TextStyle(fontWeight: FontWeight.bold),
+                 ),
+                 Text('• 用戶資料：${permissions['userDataWrite'] == true ? "✅ 可刪除" : "❌ 權限不足"}'),
+                 Text('• 配對記錄：${permissions['matchesWrite'] == true ? "✅ 可刪除" : "⚠️ 可能無法刪除"}'),
+                 
+                 const SizedBox(height: 16),
+                 const Text(
+                   '⚠️ 注意：刪除後你將無法：',
+                   style: TextStyle(fontWeight: FontWeight.bold),
+                 ),
+                 const Text('• 登入這個帳號'),
+                 const Text('• 恢復任何資料'),
+                 const Text('• 查看過往的配對記錄'),
+                 const Text('• 使用相同信箱重新註冊（可能需要等待）'),
+                 
+                 if (permissions['matchesWrite'] != true) ...[
+                   const SizedBox(height: 16),
+                   const Text(
+                     '⚠️ 配對記錄權限不足：部分配對記錄可能無法刪除，但不影響主要資料清除。',
+                     style: TextStyle(color: Colors.orange, fontSize: 12),
+                   ),
+                 ],
+                
+                if (dataSummary['error'] != null) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    '⚠️ 讀取資料時發生錯誤：${dataSummary['error']}',
+                    style: const TextStyle(color: Colors.orange),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('取消'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _showFinalConfirmation();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('我了解，繼續刪除'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// 最終確認對話框
+  void _showFinalConfirmation() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('🔒 最後確認'),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '請再次確認你真的要刪除帳號。',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              Text('這是最後一次機會可以取消！'),
+              SizedBox(height: 16),
+              Text(
+                '⚠️ 刪除過程可能需要一些時間，請耐心等待。',
+                style: TextStyle(color: Colors.orange),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('我反悔了，取消'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _executeAccountDeletion();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('確定刪除帳號'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// 執行帳號刪除
+  Future<void> _executeAccountDeletion() async {
+    // 顯示載入對話框
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('正在刪除帳號...'),
+            Text('請稍候，不要關閉應用程式'),
+            SizedBox(height: 8),
+            Text(
+              '這個過程可能需要幾分鐘',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      await _deletionService.deleteUserAccount();
+      
+      if (mounted) {
+        Navigator.of(context).pop(); // 關閉載入對話框
+        
+        // 顯示成功訊息
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            title: const Text('✅ 刪除成功'),
+            content: const Text(
+              '你的帳號和所有資料已經完全刪除。\n\n'
+              '感謝你使用 Auto30 Next，希望未來有機會再為你服務！'
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  // 導航到登入頁面並清除所有路由歷史
+                  context.go('/login');
+                },
+                child: const Text('確定'),
+              ),
+            ],
+          ),
+        );
+      }
+         } catch (e) {
+       if (mounted) {
+         Navigator.of(context).pop(); // 關閉載入對話框
+         
+         // 特殊處理認證相關錯誤
+         final errorMessage = e.toString();
+         bool isAuthError = errorMessage.contains('Google 重新認證') || 
+                           errorMessage.contains('requires-recent-login') ||
+                           errorMessage.contains('ClientID not set');
+         
+         // 顯示錯誤訊息
+         showDialog(
+           context: context,
+           builder: (context) => AlertDialog(
+             title: Text(isAuthError ? '🔐 認證問題' : '❌ 刪除失敗'),
+             content: Column(
+               mainAxisSize: MainAxisSize.min,
+               crossAxisAlignment: CrossAxisAlignment.start,
+               children: [
+                 Text(isAuthError ? '刪除帳號時遇到認證問題：' : '刪除帳號時發生錯誤：'),
+                 const SizedBox(height: 8),
+                 Text(
+                   errorMessage,
+                   style: const TextStyle(color: Colors.red, fontSize: 12),
+                 ),
+                 const SizedBox(height: 16),
+                 Text(isAuthError ? '建議的解決方案：' : '可能的解決方案：'),
+                 if (isAuthError) ...[
+                   const Text('• 重新登出並重新登入'),
+                   const Text('• 確認 Google 帳號狀態正常'),
+                   const Text('• 稍後再試'),
+                 ] else ...[
+                   const Text('• 檢查網路連線'),
+                   const Text('• 重新登入後再試'),
+                   const Text('• 聯絡客服協助'),
+                 ],
+                 if (isAuthError) ...[
+                   const SizedBox(height: 16),
+                   const Text(
+                     '注意：即使認證失敗，你的資料可能已經部分清除。',
+                     style: TextStyle(
+                       color: Colors.orange,
+                       fontSize: 12,
+                     ),
+                   ),
+                 ],
+               ],
+             ),
+             actions: [
+                                if (isAuthError) ...[
+                   TextButton(
+                     onPressed: () {
+                       Navigator.of(context).pop();
+                       // 導航到登入頁面
+                       context.go('/login');
+                     },
+                     child: const Text('重新登入'),
+                   ),
+                   TextButton(
+                     onPressed: () {
+                       Navigator.of(context).pop();
+                       _executeSimpleAccountDeletion();
+                     },
+                     style: TextButton.styleFrom(
+                       foregroundColor: Colors.orange,
+                     ),
+                     child: const Text('嘗試簡化刪除'),
+                   ),
+                 ],
+               TextButton(
+                 onPressed: () => Navigator.of(context).pop(),
+                 child: const Text('確定'),
+               ),
+             ],
+           ),
+         );
+       }
+     }
+  }
 
   @override
   void dispose() {
